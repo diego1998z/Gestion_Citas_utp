@@ -1,0 +1,60 @@
+{% extends "layouts/app.html" %}
+{% import "partials/ui.html" as ui %}
+
+{% block title %}Registrar Atención | Gestión de Citas Médicas{% endblock %}
+
+{% block content %}
+{{ ui.page_hero(
+    "Seguimiento clínico",
+    "Registrar atención",
+    "Para el MVP, si la cita aún está pendiente o confirmada, se marca como ATENDIDA y se crea el historial en una sola transacción.",
+    "Volver a citas",
+    url_for('citas.index')
+) }}
+
+<section class="content-grid">
+    <article class="panel-card panel-card-large">
+        <div class="panel-header">
+            <div>
+                <p class="section-eyebrow">Cita</p>
+                <h3>{{ cita.codigo }} · {{ cita.paciente }}</h3>
+            </div>
+            {{ ui.status_badge(cita.estado) }}
+        </div>
+
+        <dl class="history-detail">
+            <div>
+                <dt>Fecha y hora</dt>
+                <dd>{{ cita.fecha }} · {{ cita.hora }}</dd>
+            </div>
+            <div>
+                <dt>Médico</dt>
+                <dd>{{ cita.medico }}</dd>
+            </div>
+            <div>
+                <dt>Especialidad</dt>
+                <dd>{{ cita.especialidad }}</dd>
+            </div>
+        </dl>
+
+        <form class="appointment-form" action="{{ action_url }}" method="post">
+            <label class="form-field">
+                <span>Observación clínica</span>
+                <textarea name="observacion" rows="7" placeholder="Registrar diagnóstico, indicaciones u observaciones de la atención" required>{{ form_data.observacion or '' }}</textarea>
+                {% if errors.observacion %}<p class="field-error">{{ errors.observacion }}</p>{% endif %}
+            </label>
+
+            <div class="form-actions">
+                <a class="button-link" href="{{ url_for('citas.index') }}">Cancelar</a>
+                <button type="submit">Registrar historial</button>
+            </div>
+        </form>
+    </article>
+
+    <aside class="panel-card">
+        <p class="section-eyebrow">Regla MVP</p>
+        <h3>Historial desde cita</h3>
+        <p>El historial se vincula por <strong>id_cita</strong>. No se agrega <code>id_paciente</code> porque el paciente se obtiene mediante la cita.</p>
+    </aside>
+</section>
+{% endblock %}

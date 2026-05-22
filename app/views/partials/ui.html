@@ -1,0 +1,32 @@
+{% macro page_hero(eyebrow, title, description, action_label=None, action_url="#") %}
+<section class="dashboard-hero">
+    <div>
+        <p class="section-eyebrow">{{ eyebrow }}</p>
+        <h2>{{ title }}</h2>
+        <p>{{ description }}</p>
+    </div>
+    {% if action_label %}
+        <a class="primary-action" href="{{ action_url }}">{{ action_label }}</a>
+    {% endif %}
+</section>
+{% endmacro %}
+
+{% macro metric_grid(items, compact=False, aria_label="Indicadores") %}
+<section class="metric-grid {{ 'metric-grid-compact' if compact else '' }}" aria-label="{{ aria_label }}">
+    {% for item in items %}
+        <article class="metric-card {{ 'metric-' ~ item.tono if item.tono|default('') else '' }}">
+            <span class="metric-label">{{ item.titulo }}</span>
+            <strong>{{ item.valor }}</strong>
+            {% if item.detalle|default("") %}
+                <small>{{ item.detalle }}</small>
+            {% endif %}
+        </article>
+    {% endfor %}
+</section>
+{% endmacro %}
+
+{% macro status_badge(status) %}
+<span class="status-badge status-{{ status|lower|replace(' ', '-') }}">
+    {{ status|replace('_', ' ') }}
+</span>
+{% endmacro %}

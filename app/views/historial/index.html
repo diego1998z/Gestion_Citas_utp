@@ -1,0 +1,65 @@
+{% extends "layouts/app.html" %}
+{% import "partials/ui.html" as ui %}
+
+{% block title %}Historial de Citas | Gestión de Citas Médicas{% endblock %}
+
+{% block content %}
+{{ ui.page_hero(
+    "Seguimiento clínico",
+    "Historial de citas",
+    "Atenciones generadas desde citas reales. El paciente se obtiene mediante la cita; historial no duplica id_paciente.",
+    "Ver citas",
+    url_for('citas.index')
+) }}
+
+{{ ui.metric_grid(indicadores, compact=True, aria_label="Indicadores de historial") }}
+
+<article class="panel-card">
+    <div class="panel-header">
+        <div>
+            <p class="section-eyebrow">Registros</p>
+            <h3>Atenciones recientes</h3>
+        </div>
+        <form class="search-form" action="{{ url_for('historial.index') }}" method="get">
+            <label class="sr-only" for="buscar-historial">Buscar historial</label>
+            <input id="buscar-historial" name="q" type="search" value="{{ busqueda }}" placeholder="Buscar por paciente, médico o diagnóstico">
+        </form>
+    </div>
+
+    <div class="history-list">
+        {% for historial in historiales %}
+            <article class="history-item">
+                <div class="history-date">
+                    <strong>{{ historial.fecha_atencion }}</strong>
+                    <span>{{ historial.codigo }}</span>
+                </div>
+                <div class="history-detail">
+                    <div class="history-heading">
+                        <div>
+                            <h4>{{ historial.paciente }}</h4>
+                            <p>DNI {{ historial.paciente_dni }} · Cita {{ historial.id_cita }}</p>
+                        </div>
+                        {{ ui.status_badge(historial.estado_cita) }}
+                    </div>
+                    <dl>
+                        <div>
+                            <dt>Médico</dt>
+                            <dd>{{ historial.medico }}</dd>
+                        </div>
+                        <div>
+                            <dt>Especialidad</dt>
+                            <dd>{{ historial.especialidad }}</dd>
+                        </div>
+                        <div>
+                            <dt>Observación clínica</dt>
+                            <dd>{{ historial.observaciones or historial.diagnostico }}</dd>
+                        </div>
+                    </dl>
+                </div>
+            </article>
+        {% else %}
+            <p>No hay historiales registrados para mostrar.</p>
+        {% endfor %}
+    </div>
+</article>
+{% endblock %}

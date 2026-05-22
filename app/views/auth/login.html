@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}Login | Clínica Universitaria de Comas{% endblock %}
+
+{% block content %}
+<section class="login-page" aria-labelledby="login-title">
+    <div class="login-hero-card">
+        <div class="login-brand-mark" aria-hidden="true">CUC</div>
+        <p class="login-eyebrow">Sistema de Gestión de Citas Médicas</p>
+        <h1 id="login-title">Clínica Universitaria de Comas</h1>
+        <p class="login-hero-text">
+            Accedé al panel para gestionar pacientes, médicos, horarios e historial de atención.
+        </p>
+
+        <div class="login-feature-list" aria-label="Funciones principales del sistema">
+            <article>
+                <span aria-hidden="true">✓</span>
+                <div>
+                    <strong>Agenda médica</strong>
+                    <small>Disponibilidad, programación y reprogramación de citas.</small>
+                </div>
+            </article>
+            <article>
+                <span aria-hidden="true">✓</span>
+                <div>
+                    <strong>Roles protegidos</strong>
+                    <small>Acceso real validado por sesión y permisos del sistema.</small>
+                </div>
+            </article>
+            <article>
+                <span aria-hidden="true">✓</span>
+                <div>
+                    <strong>Historial clínico</strong>
+                    <small>Seguimiento ordenado de la atención del paciente.</small>
+                </div>
+            </article>
+        </div>
+    </div>
+
+    <div class="login-form-card">
+        <div class="login-form-header">
+            <p class="login-eyebrow">Bienvenido</p>
+            <h2>Iniciar sesión</h2>
+            <p>Usá tu usuario del sistema para ingresar.</p>
+        </div>
+
+        <div class="role-selector" aria-label="Selector visual de rol">
+            <button class="role-option is-selected" type="button" data-role-option="ADMINISTRADOR">
+                Administrador
+            </button>
+            <button class="role-option" type="button" data-role-option="RECEPCIONISTA">
+                Recepción
+            </button>
+            <button class="role-option" type="button" data-role-option="MEDICO">
+                Médico
+            </button>
+        </div>
+        <p class="role-helper">
+            El rol es visual: la autorización real se toma desde la base de datos al iniciar sesión.
+        </p>
+
+        <form
+            method="post"
+            action="{{ url_for('auth.login') }}{% if request.args.get('next') %}?next={{ request.args.get('next')|urlencode }}{% endif %}"
+            class="login-form"
+            novalidate
+        >
+            <input id="rol" name="rol" type="hidden" value="ADMINISTRADOR">
+
+            <div class="form-field">
+                <label for="username">Usuario</label>
+                <input
+                    id="username"
+                    name="username"
+                    type="text"
+                    autocomplete="username"
+                    maxlength="50"
+                    value="{{ form_data.username if form_data else '' }}"
+                    placeholder="Ej. admin"
+                    required
+                    {% if errors and errors.username %}aria-describedby="username-error"{% endif %}
+                >
+                {% if errors and errors.username %}
+                    <p id="username-error" class="field-error">{{ errors.username }}</p>
+                {% endif %}
+            </div>
+
+            <div class="form-field">
+                <label for="password">Contraseña</label>
+                <div class="password-field">
+                    <input
+                        id="password"
+                        name="password"
+                        type="password"
+                        autocomplete="current-password"
+                        maxlength="128"
+                        placeholder="Ingresá tu contraseña"
+                        required
+                        {% if errors and errors.password %}aria-describedby="password-error"{% endif %}
+                    >
+                    <button
+                        class="password-toggle"
+                        type="button"
+                        data-password-toggle
+                        aria-controls="password"
+                        aria-label="Mostrar contraseña"
+                    >
+                        Mostrar
+                    </button>
+                </div>
+                {% if errors and errors.password %}
+                    <p id="password-error" class="field-error">{{ errors.password }}</p>
+                {% endif %}
+            </div>
+
+            <button class="login-submit" type="submit">Ingresar al sistema</button>
+        </form>
+    </div>
+</section>
+{% endblock %}

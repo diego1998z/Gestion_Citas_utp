@@ -1,0 +1,13 @@
+<header class="app-topbar">
+    <div>
+        <p class="page-kicker">{{ page_kicker|default("Clínica Universitaria de Comas") }}</p>
+        <h1>{{ page_title|default("Panel de control") }}</h1>
+    </div>
+
+    <div class="topbar-actions">
+        <span class="topbar-date">{{ current_user.nombre_completo or current_user.username }}</span>
+        <form method="post" action="{{ url_for('auth.logout') }}" class="nav-form">
+            <button type="submit" class="secondary-button">Cerrar sesión</button>
+        </form>
+    </div>
+</header>

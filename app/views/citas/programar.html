@@ -1,0 +1,106 @@
+{% extends "layouts/app.html" %}
+{% import "partials/ui.html" as ui %}
+
+{% block title %}Programar Cita | Gestión de Citas Médicas{% endblock %}
+
+{% block content %}
+{{ ui.page_hero(
+    "Agenda médica",
+    "Programar cita",
+    "Registro real de citas: primero se valida horario del médico y que no exista otra cita activa en la misma fecha y hora.",
+    "Ver citas",
+    url_for('citas.index')
+) }}
+
+<section class="content-grid">
+    <article class="panel-card panel-card-large">
+        <div class="panel-header">
+            <div>
+                <p class="section-eyebrow">Nueva cita</p>
+                <h3>Datos de programación</h3>
+            </div>
+        </div>
+
+        <form class="appointment-form" action="{{ url_for('citas.programar') }}" method="post">
+            <div class="form-grid">
+                <label class="form-field">
+                    <span>Paciente</span>
+                    <select name="id_paciente" required>
+                        <option value="">Seleccionar paciente</option>
+                        {% for paciente in pacientes %}
+                            <option value="{{ paciente.id_paciente }}" {% if form_data.id_paciente == paciente.id_paciente %}selected{% endif %}>
+                                {{ paciente.apellidos }}, {{ paciente.nombres }} · DNI {{ paciente.dni }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    {% if errors.id_paciente %}<p class="field-error">{{ errors.id_paciente }}</p>{% endif %}
+                </label>
+
+                <label class="form-field">
+                    <span>Médico</span>
+                    <select name="id_medico" required onchange="this.form.method='get'; this.form.submit();">
+                        <option value="">Seleccionar médico</option>
+                        {% for medico in medicos %}
+                            <option value="{{ medico.id_medico }}" {% if form_data.id_medico == medico.id_medico %}selected{% endif %}>
+                                {{ medico.apellidos }}, {{ medico.nombres }} · {{ medico.especialidad }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    {% if errors.id_medico %}<p class="field-error">{{ errors.id_medico }}</p>{% endif %}
+                </label>
+
+                <label class="form-field">
+                    <span>Fecha</span>
+                    <input name="fecha" type="date" value="{{ form_data.fecha or '' }}" required>
+                    {% if errors.fecha %}<p class="field-error">{{ errors.fecha }}</p>{% endif %}
+                </label>
+
+                <label class="form-field">
+                    <span>Hora</span>
+                    <select name="hora" required>
+                        <option value="">Seleccionar hora de inicio</option>
+                        {% for horario in horarios_disponibles %}
+                            <option value="{{ horario.hora_inicio_form }}" {% if form_data.hora == horario.hora_inicio_form %}selected{% endif %}>
+                                {{ horario.fecha }} · {{ horario.hora_inicio_form }} - {{ horario.hora_fin_form }}
+                                {% if horario.medico %}· {{ horario.medico }}{% endif %}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    {% if errors.hora %}<p class="field-error">{{ errors.hora }}</p>{% endif %}
+                </label>
+            </div>
+
+            <label class="form-field">
+                <span>Motivo de consulta</span>
+                <textarea name="motivo_consulta" rows="4" placeholder="Describir brevemente el motivo de la cita">{{ form_data.motivo_consulta or '' }}</textarea>
+                {% if errors.motivo_consulta %}<p class="field-error">{{ errors.motivo_consulta }}</p>{% endif %}
+            </label>
+
+            <div class="form-actions">
+                <a class="button-link" href="{{ url_for('citas.index') }}">Cancelar</a>
+                <button type="submit">Programar cita</button>
+            </div>
+        </form>
+    </article>
+
+    <aside class="panel-card">
+        <div class="panel-header">
+            <div>
+                <p class="section-eyebrow">Disponibilidad</p>
+                <h3>Horarios disponibles</h3>
+            </div>
+        </div>
+
+        <div class="stack-list">
+            {% for horario in horarios_disponibles %}
+                <article class="stack-item stack-item-vertical">
+                    <span>{{ horario.fecha }} · {{ horario.hora_inicio_form }} - {{ horario.hora_fin_form }}</span>
+                    <strong>{{ horario.medico or 'Médico seleccionado' }}</strong>
+                </article>
+            {% else %}
+                <p>No hay horarios disponibles para mostrar. Seleccioná otro médico o cargá horarios desde el módulo de médicos.</p>
+            {% endfor %}
+        </div>
+    </aside>
+</section>
+{% endblock %}

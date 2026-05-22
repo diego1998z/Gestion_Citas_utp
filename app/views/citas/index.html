@@ -1,0 +1,105 @@
+{% extends "layouts/app.html" %}
+{% import "partials/ui.html" as ui %}
+
+{% block title %}Citas Médicas | Gestión de Citas Médicas{% endblock %}
+
+{% block content %}
+{{ ui.page_hero(
+    "Agenda médica",
+    "Citas médicas",
+    "Listado real de citas con acciones de cancelación, notificación, reprogramación y atención según rol.",
+    "Programar cita" if current_user.rol in ["ADMINISTRADOR", "RECEPCIONISTA"] else None,
+    url_for('citas.programar')
+) }}
+
+{{ ui.metric_grid(indicadores, compact=True, aria_label="Indicadores de citas") }}
+
+<article class="panel-card">
+    <div class="panel-header">
+        <div>
+            <p class="section-eyebrow">Agenda</p>
+            <h3>Citas registradas</h3>
+        </div>
+        <form class="search-form" action="{{ url_for('citas.index') }}" method="get">
+            <label class="sr-only" for="buscar-cita">Buscar cita</label>
+            <input id="buscar-cita" name="q" type="search" value="{{ busqueda }}" placeholder="Buscar por paciente, médico o estado">
+        </form>
+    </div>
+
+    <div class="responsive-table">
+        <table>
+            <thead>
+                <tr>
+                    <th>Código</th>
+                    <th>Fecha y hora</th>
+                    <th>Paciente</th>
+                    <th>Médico</th>
+                    <th>Especialidad</th>
+                    <th>Notificación</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cita in citas %}
+                    {% set es_activa = cita.estado in ["PENDIENTE", "CONFIRMADA"] %}
+                    <tr>
+                        <td>{{ cita.codigo }}</td>
+                        <td>
+                            <strong>{{ cita.fecha }}</strong>
+                            <small class="table-muted">{{ cita.hora }}</small>
+                        </td>
+                        <td>
+                            {{ cita.paciente }}
+                            <small class="table-muted">DNI {{ cita.paciente_dni }}</small>
+                        </td>
+                        <td>{{ cita.medico }}</td>
+                        <td>{{ cita.especialidad }}</td>
+                        <td>
+                            {% if cita.notificado %}
+                                Sí
+                                {% if cita.fecha_notificacion %}
+                                    <small class="table-muted">{{ cita.fecha_notificacion }}</small>
+                                {% endif %}
+                            {% else %}
+                                No
+                            {% endif %}
+                        </td>
+                        <td>{{ ui.status_badge(cita.estado) }}</td>
+                        <td>
+                            <div class="inline-actions">
+                                {% if current_user.rol in ["ADMINISTRADOR", "RECEPCIONISTA"] and es_activa %}
+                                    {% if not cita.notificado %}
+                                        <form action="{{ url_for('citas.notificar', id_cita=cita.id_cita) }}" method="post">
+                                            <button class="compact-button secondary-button" type="submit">Notificar</button>
+                                        </form>
+                                    {% endif %}
+                                    <a class="button-link compact-button" href="{{ url_for('citas.reprogramar', id_cita=cita.id_cita) }}">Reprogramar</a>
+                                    <form action="{{ url_for('citas.cancelar', id_cita=cita.id_cita) }}" method="post">
+                                        <label class="sr-only" for="motivo-cancelacion-{{ cita.id_cita }}">Motivo</label>
+                                        <input id="motivo-cancelacion-{{ cita.id_cita }}" name="motivo_cancelacion" type="text" placeholder="Motivo" required>
+                                        <button class="compact-button" type="submit">Cancelar</button>
+                                    </form>
+                                {% endif %}
+
+                                {% if current_user.rol in ["ADMINISTRADOR", "MEDICO"] and es_activa %}
+                                    <a class="button-link compact-button" href="{{ url_for('historial.nuevo_desde_cita', id_cita=cita.id_cita) }}">Atender</a>
+                                    <form action="{{ url_for('citas.marcar_no_asistio', id_cita=cita.id_cita) }}" method="post">
+                                        <button class="compact-button secondary-button" type="submit">No asistió</button>
+                                    </form>
+                                {% elif current_user.rol in ["ADMINISTRADOR", "MEDICO"] and cita.estado == "ATENDIDA" and not cita.tiene_historial %}
+                                    <a class="button-link compact-button" href="{{ url_for('historial.nuevo_desde_cita', id_cita=cita.id_cita) }}">Crear historial</a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="8">No hay citas registradas para mostrar.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</article>
+{% endblock %}

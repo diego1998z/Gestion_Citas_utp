@@ -1,0 +1,162 @@
+{% extends "layouts/app.html" %}
+{% import "partials/ui.html" as ui %}
+
+{% block title %}{{ page_title }} | Gestión de Citas Médicas{% endblock %}
+
+{% block content %}
+{{ ui.page_hero(
+    page_kicker,
+    page_title,
+    "Alta y edición del perfil médico asociado a usuario_sistema, especialidad y disponibilidad horaria.",
+    "Volver al listado",
+    url_for("medicos.index")
+) }}
+
+<section class="content-grid">
+    <article class="panel-card panel-card-large">
+        <div class="panel-header">
+            <div>
+                <p class="section-eyebrow">Datos del médico</p>
+                <h3>{{ submit_label }}</h3>
+            </div>
+        </div>
+
+        <form class="appointment-form" action="{{ action_url }}" method="post" novalidate>
+            <div class="form-grid">
+                <label class="form-field" for="username">
+                    <span>Usuario *</span>
+                    <input id="username" name="username" type="text" maxlength="50" value="{{ form_data.username|default('', true) }}" required>
+                    {% if errors.username %}<small class="field-error">{{ errors.username }}</small>{% endif %}
+                </label>
+
+                <label class="form-field" for="password">
+                    <span>Contraseña inicial{% if requiere_password %} *{% endif %}</span>
+                    <input id="password" name="password" type="password" maxlength="128" {% if requiere_password %}required{% endif %}>
+                    {% if errors.password %}<small class="field-error">{{ errors.password }}</small>{% endif %}
+                    {% if not requiere_password %}
+                        <small class="table-muted">La actualización de contraseña queda para el módulo de usuarios.</small>
+                    {% endif %}
+                </label>
+
+                <label class="form-field" for="nombres">
+                    <span>Nombres *</span>
+                    <input id="nombres" name="nombres" type="text" maxlength="100" value="{{ form_data.nombres|default('', true) }}" required>
+                    {% if errors.nombres %}<small class="field-error">{{ errors.nombres }}</small>{% endif %}
+                </label>
+
+                <label class="form-field" for="apellidos">
+                    <span>Apellidos *</span>
+                    <input id="apellidos" name="apellidos" type="text" maxlength="100" value="{{ form_data.apellidos|default('', true) }}" required>
+                    {% if errors.apellidos %}<small class="field-error">{{ errors.apellidos }}</small>{% endif %}
+                </label>
+
+                <label class="form-field" for="email">
+                    <span>Correo</span>
+                    <input id="email" name="email" type="email" maxlength="120" value="{{ form_data.email|default('', true) }}">
+                    {% if errors.email %}<small class="field-error">{{ errors.email }}</small>{% endif %}
+                </label>
+
+                <label class="form-field" for="telefono">
+                    <span>Teléfono</span>
+                    <input id="telefono" name="telefono" type="text" maxlength="20" value="{{ form_data.telefono|default('', true) }}">
+                    {% if errors.telefono %}<small class="field-error">{{ errors.telefono }}</small>{% endif %}
+                </label>
+
+                <label class="form-field" for="id_especialidad">
+                    <span>Especialidad *</span>
+                    <select id="id_especialidad" name="id_especialidad" required>
+                        <option value="">Seleccionar</option>
+                        {% for especialidad in especialidades %}
+                            <option value="{{ especialidad.id_especialidad }}" {% if form_data.id_especialidad|string == especialidad.id_especialidad|string %}selected{% endif %}>
+                                {{ especialidad.nombre }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    {% if errors.id_especialidad %}<small class="field-error">{{ errors.id_especialidad }}</small>{% endif %}
+                </label>
+
+                <label class="form-field" for="numero_colegiatura">
+                    <span>Número de colegiatura *</span>
+                    <input id="numero_colegiatura" name="numero_colegiatura" type="text" maxlength="30" value="{{ form_data.numero_colegiatura|default('', true) }}" required>
+                    {% if errors.numero_colegiatura %}<small class="field-error">{{ errors.numero_colegiatura }}</small>{% endif %}
+                </label>
+
+                <label class="form-field" for="estado">
+                    <span>Estado *</span>
+                    <select id="estado" name="estado" required>
+                        {% for estado in ["ACTIVO", "INACTIVO"] %}
+                            <option value="{{ estado }}" {% if form_data.estado|default("ACTIVO") == estado %}selected{% endif %}>{{ estado }}</option>
+                        {% endfor %}
+                    </select>
+                    {% if errors.estado %}<small class="field-error">{{ errors.estado }}</small>{% endif %}
+                </label>
+            </div>
+
+            <div class="form-actions">
+                <a class="secondary-button button-link" href="{{ url_for('medicos.index') }}">Cancelar</a>
+                <button type="submit">{{ submit_label }}</button>
+            </div>
+        </form>
+    </article>
+
+    <aside class="panel-card">
+        <div class="panel-header">
+            <div>
+                <p class="section-eyebrow">Horarios</p>
+                <h3>Disponibilidad</h3>
+            </div>
+        </div>
+
+        {% if form_data.id_medico %}
+            <form class="appointment-form" action="{{ url_for('medicos.crear_horario', id_medico=form_data.id_medico) }}" method="post">
+                <label class="form-field" for="fecha">
+                    <span>Fecha</span>
+                    <input id="fecha" name="fecha" type="date" required>
+                </label>
+                <div class="form-grid form-grid-tight">
+                    <label class="form-field" for="hora_inicio">
+                        <span>Inicio</span>
+                        <input id="hora_inicio" name="hora_inicio" type="time" required>
+                    </label>
+                    <label class="form-field" for="hora_fin">
+                        <span>Fin</span>
+                        <input id="hora_fin" name="hora_fin" type="time" required>
+                    </label>
+                </div>
+                <label class="form-field" for="estado_horario">
+                    <span>Estado</span>
+                    <select id="estado_horario" name="estado">
+                        <option value="DISPONIBLE">DISPONIBLE</option>
+                        <option value="NO_DISPONIBLE">NO_DISPONIBLE</option>
+                    </select>
+                </label>
+                <button type="submit">Agregar horario</button>
+            </form>
+
+            <div class="stack-list schedule-list">
+                {% for horario in horarios %}
+                    <article class="stack-item stack-item-vertical">
+                        <span>
+                            {{ horario.fecha }} · {{ horario.hora_inicio }} - {{ horario.hora_fin }}
+                        </span>
+                        <div class="inline-actions">
+                            {{ ui.status_badge(horario.estado) }}
+                            <form action="{{ url_for('medicos.actualizar_estado_horario', id_horario=horario.id_horario) }}" method="post">
+                                <input type="hidden" name="id_medico" value="{{ form_data.id_medico }}">
+                                <input type="hidden" name="estado" value="{{ 'NO_DISPONIBLE' if horario.estado == 'DISPONIBLE' else 'DISPONIBLE' }}">
+                                <button class="secondary-button compact-button" type="submit">
+                                    {{ "Desactivar" if horario.estado == "DISPONIBLE" else "Activar" }}
+                                </button>
+                            </form>
+                        </div>
+                    </article>
+                {% else %}
+                    <p>No hay horarios configurados.</p>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="table-muted">Primero registrá el médico; después vas a poder cargar horarios.</p>
+        {% endif %}
+    </aside>
+</section>
+{% endblock %}

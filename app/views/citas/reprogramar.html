@@ -1,0 +1,107 @@
+{% extends "layouts/app.html" %}
+{% import "partials/ui.html" as ui %}
+
+{% block title %}Reprogramar Cita | Gestión de Citas Médicas{% endblock %}
+
+{% block content %}
+{{ ui.page_hero(
+    "Agenda médica",
+    "Reprogramar cita",
+    "La reprogramación crea una nueva cita y marca la anterior como REPROGRAMADA para conservar trazabilidad.",
+    "Volver a citas",
+    url_for('citas.index')
+) }}
+
+<section class="content-grid">
+    <article class="panel-card panel-card-large">
+        <div class="panel-header">
+            <div>
+                <p class="section-eyebrow">Cita original</p>
+                <h3>{{ cita.codigo }} · {{ cita.paciente }}</h3>
+            </div>
+            {{ ui.status_badge(cita.estado) }}
+        </div>
+
+        <dl class="history-detail">
+            <div>
+                <dt>Fecha y hora actual</dt>
+                <dd>{{ cita.fecha }} · {{ cita.hora }}</dd>
+            </div>
+            <div>
+                <dt>Médico actual</dt>
+                <dd>{{ cita.medico }}</dd>
+            </div>
+            <div>
+                <dt>Especialidad</dt>
+                <dd>{{ cita.especialidad }}</dd>
+            </div>
+        </dl>
+
+        <form class="appointment-form" action="{{ url_for('citas.reprogramar', id_cita=cita.id_cita) }}" method="post">
+            <div class="form-grid">
+                <label class="form-field">
+                    <span>Nuevo médico</span>
+                    <select name="id_medico" required onchange="this.form.method='get'; this.form.submit();">
+                        {% for medico in medicos %}
+                            <option value="{{ medico.id_medico }}" {% if form_data.id_medico == medico.id_medico %}selected{% endif %}>
+                                {{ medico.apellidos }}, {{ medico.nombres }} · {{ medico.especialidad }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    {% if errors.id_medico %}<p class="field-error">{{ errors.id_medico }}</p>{% endif %}
+                </label>
+
+                <label class="form-field">
+                    <span>Nueva fecha</span>
+                    <input name="fecha" type="date" value="{{ form_data.fecha or '' }}" required>
+                    {% if errors.fecha %}<p class="field-error">{{ errors.fecha }}</p>{% endif %}
+                </label>
+
+                <label class="form-field">
+                    <span>Nueva hora</span>
+                    <select name="hora" required>
+                        <option value="">Seleccionar hora de inicio</option>
+                        {% for horario in horarios_disponibles %}
+                            <option value="{{ horario.hora_inicio_form }}" {% if form_data.hora == horario.hora_inicio_form %}selected{% endif %}>
+                                {{ horario.fecha }} · {{ horario.hora_inicio_form }} - {{ horario.hora_fin_form }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    {% if errors.hora %}<p class="field-error">{{ errors.hora }}</p>{% endif %}
+                </label>
+            </div>
+
+            <label class="form-field">
+                <span>Motivo de consulta</span>
+                <textarea name="motivo_consulta" rows="4">{{ form_data.motivo_consulta or '' }}</textarea>
+                {% if errors.motivo_consulta %}<p class="field-error">{{ errors.motivo_consulta }}</p>{% endif %}
+            </label>
+
+            <div class="form-actions">
+                <a class="button-link" href="{{ url_for('citas.index') }}">Cancelar</a>
+                <button type="submit">Crear nueva cita</button>
+            </div>
+        </form>
+    </article>
+
+    <aside class="panel-card">
+        <div class="panel-header">
+            <div>
+                <p class="section-eyebrow">Disponibilidad</p>
+                <h3>Horarios disponibles</h3>
+            </div>
+        </div>
+
+        <div class="stack-list">
+            {% for horario in horarios_disponibles %}
+                <article class="stack-item stack-item-vertical">
+                    <span>{{ horario.fecha }} · {{ horario.hora_inicio_form }} - {{ horario.hora_fin_form }}</span>
+                    <strong>{{ horario.medico or 'Médico seleccionado' }}</strong>
+                </article>
+            {% else %}
+                <p>No hay horarios disponibles para el médico seleccionado.</p>
+            {% endfor %}
+        </div>
+    </aside>
+</section>
+{% endblock %}

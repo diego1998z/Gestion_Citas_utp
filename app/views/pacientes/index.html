@@ -1,0 +1,106 @@
+{% extends "layouts/app.html" %}
+{% import "partials/ui.html" as ui %}
+
+{% block title %}Gestión de Pacientes | Gestión de Citas Médicas{% endblock %}
+
+{% block content %}
+{{ ui.page_hero(
+    "Módulo de admisión",
+    "Gestión de pacientes",
+    "Registro de pacientes conectado al modelo. La vista no consulta la base de datos: sólo renderiza datos preparados por el controlador.",
+    "Registrar paciente",
+    url_for("pacientes.nuevo")
+) }}
+
+{{ ui.metric_grid(indicadores, compact=True, aria_label="Indicadores de pacientes") }}
+
+<section class="content-grid">
+    <article class="panel-card panel-card-large">
+        <div class="panel-header">
+            <div>
+                <p class="section-eyebrow">Directorio</p>
+                <h3>Pacientes registrados</h3>
+            </div>
+            <form class="search-form" action="{{ url_for('pacientes.index') }}" method="get">
+                <label class="sr-only" for="buscar-paciente">Buscar paciente</label>
+                <input id="buscar-paciente" name="q" type="search" placeholder="Buscar por nombre, DNI o teléfono" value="{{ busqueda }}">
+            </form>
+        </div>
+
+        <div class="responsive-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Paciente</th>
+                        <th>Documento</th>
+                        <th>Contacto</th>
+                        <th>Última cita</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for paciente in pacientes %}
+                        <tr>
+                            <td>{{ paciente.codigo }}</td>
+                            <td>
+                                <strong>{{ paciente.nombres }} {{ paciente.apellidos }}</strong>
+                                <small class="table-muted">
+                                    {% if paciente.edad is not none %}
+                                        {{ paciente.edad }} años
+                                    {% else %}
+                                        Sin fecha de nacimiento
+                                    {% endif %}
+                                </small>
+                            </td>
+                            <td>DNI {{ paciente.dni }}</td>
+                            <td>
+                                {{ paciente.telefono or "Sin teléfono" }}
+                                <small class="table-muted">{{ paciente.email or "Sin correo" }}</small>
+                            </td>
+                            <td>{{ paciente.ultima_cita or "Sin cita" }}</td>
+                            <td>
+                                <a class="text-link" href="{{ url_for('pacientes.editar', id_paciente=paciente.id_paciente) }}">
+                                    Editar
+                                </a>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="6">No hay pacientes para mostrar.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </article>
+
+    <aside class="panel-card">
+        <div class="panel-header">
+            <div>
+                <p class="section-eyebrow">Segmentos</p>
+                <h3>Distribución actual</h3>
+            </div>
+        </div>
+
+        <div class="stack-list">
+            {% for segmento in segmentos %}
+                <article class="stack-item">
+                    <span>{{ segmento.nombre }}</span>
+                    <strong>{{ segmento.cantidad }}</strong>
+                </article>
+            {% else %}
+                <p>No hay segmentos cargados.</p>
+            {% endfor %}
+        </div>
+
+        <div class="quick-note">
+            <p class="section-eyebrow">Regla MVC</p>
+            <p>
+                SQL en modelos, validación en controlador/utils y render simple acá.
+                Esa separación mantiene el módulo preparado para crecer sin mezclar responsabilidades.
+            </p>
+        </div>
+    </aside>
+</section>
+{% endblock %}

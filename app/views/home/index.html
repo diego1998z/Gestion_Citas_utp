@@ -1,0 +1,125 @@
+{% extends "layouts/app.html" %}
+{% import "partials/ui.html" as ui %}
+
+{% block title %}Dashboard | Gestión de Citas Médicas{% endblock %}
+
+{% block content %}
+{{ ui.page_hero(
+    "Bienvenido al sistema",
+    "Panel de control de citas médicas",
+    "Vista operativa para monitorear citas, disponibilidad médica e historial de atención. Los datos actuales son temporales hasta conectar los modelos reales.",
+    "Nueva cita",
+    url_for("citas.programar")
+) }}
+
+{{ ui.metric_grid(resumen, aria_label="Indicadores principales") }}
+
+<section class="content-grid">
+    <article class="panel-card panel-card-large">
+        <div class="panel-header">
+            <div>
+                <p class="section-eyebrow">Agenda</p>
+                <h3>Próximas citas</h3>
+            </div>
+            <a href="{{ url_for('citas.programar') }}" class="text-link">Ver agenda</a>
+        </div>
+
+        <div class="responsive-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Hora</th>
+                        <th>Paciente</th>
+                        <th>Médico</th>
+                        <th>Especialidad</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cita in proximas_citas %}
+                        <tr>
+                            <td>{{ cita.hora }}</td>
+                            <td>{{ cita.paciente }}</td>
+                            <td>{{ cita.medico }}</td>
+                            <td>{{ cita.especialidad }}</td>
+                            <td>{{ ui.status_badge(cita.estado) }}</td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="5">No hay citas programadas para mostrar.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </article>
+
+    <aside class="panel-card">
+        <div class="panel-header">
+            <div>
+                <p class="section-eyebrow">Actividad</p>
+                <h3>Últimos movimientos</h3>
+            </div>
+        </div>
+
+        <ul class="activity-list">
+            {% for actividad in actividad_reciente %}
+                <li>
+                    <span aria-hidden="true"></span>
+                    {{ actividad }}
+                </li>
+            {% else %}
+                <li>No hay actividad reciente.</li>
+            {% endfor %}
+        </ul>
+    </aside>
+</section>
+
+{% if current_user and current_user.rol == "ADMINISTRADOR" %}
+    <section class="content-grid admin-dashboard-grid">
+        <article class="panel-card panel-card-large">
+            <div class="panel-header">
+                <div>
+                    <p class="section-eyebrow">Administración</p>
+                    <h3>Panel de control administrador</h3>
+                </div>
+            </div>
+
+            <div class="admin-module-grid">
+                {% for modulo in modulos_admin %}
+                    <article class="admin-module-card">
+                        <span aria-hidden="true">{{ modulo.icono }}</span>
+                        <div>
+                            <h4>{{ modulo.titulo }}</h4>
+                            <p>{{ modulo.descripcion }}</p>
+                        </div>
+                        <a class="text-link" href="{{ modulo.url }}">Abrir</a>
+                    </article>
+                {% else %}
+                    <p>No hay módulos administrativos para mostrar.</p>
+                {% endfor %}
+            </div>
+        </article>
+
+        <aside class="panel-card">
+            <div class="panel-header">
+                <div>
+                    <p class="section-eyebrow">Alertas</p>
+                    <h3>Prioridades</h3>
+                </div>
+            </div>
+
+            <ul class="activity-list">
+                {% for alerta in alertas_admin %}
+                    <li>
+                        <span aria-hidden="true"></span>
+                        {{ alerta }}
+                    </li>
+                {% else %}
+                    <li>No hay alertas administrativas.</li>
+                {% endfor %}
+            </ul>
+        </aside>
+    </section>
+{% endif %}
+{% endblock %}

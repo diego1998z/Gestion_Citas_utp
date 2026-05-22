@@ -1,0 +1,66 @@
+{% extends "layouts/app.html" %}
+{% import "partials/ui.html" as ui %}
+
+{% block title %}{{ page_title }} | Gestión de Citas Médicas{% endblock %}
+
+{% block content %}
+{{ ui.page_hero(
+    page_kicker,
+    page_title,
+    "Cargá datos consistentes del paciente. El controlador valida y PacienteModel persiste con consultas parametrizadas.",
+    "Volver al listado",
+    url_for("pacientes.index")
+) }}
+
+<section class="panel-card">
+    <form class="appointment-form" action="{{ action_url }}" method="post" novalidate>
+        <div class="form-grid">
+            <label class="form-field" for="dni">
+                <span>DNI *</span>
+                <input id="dni" name="dni" type="text" maxlength="15" value="{{ form_data.dni|default('', true) }}" required>
+                {% if errors.dni %}<small class="field-error">{{ errors.dni }}</small>{% endif %}
+            </label>
+
+            <label class="form-field" for="fecha_nacimiento">
+                <span>Fecha de nacimiento</span>
+                <input id="fecha_nacimiento" name="fecha_nacimiento" type="date" value="{{ form_data.fecha_nacimiento|default('', true) }}">
+                {% if errors.fecha_nacimiento %}<small class="field-error">{{ errors.fecha_nacimiento }}</small>{% endif %}
+            </label>
+
+            <label class="form-field" for="nombres">
+                <span>Nombres *</span>
+                <input id="nombres" name="nombres" type="text" maxlength="100" value="{{ form_data.nombres|default('', true) }}" required>
+                {% if errors.nombres %}<small class="field-error">{{ errors.nombres }}</small>{% endif %}
+            </label>
+
+            <label class="form-field" for="apellidos">
+                <span>Apellidos *</span>
+                <input id="apellidos" name="apellidos" type="text" maxlength="100" value="{{ form_data.apellidos|default('', true) }}" required>
+                {% if errors.apellidos %}<small class="field-error">{{ errors.apellidos }}</small>{% endif %}
+            </label>
+
+            <label class="form-field" for="telefono">
+                <span>Teléfono</span>
+                <input id="telefono" name="telefono" type="text" maxlength="20" value="{{ form_data.telefono|default('', true) }}">
+                {% if errors.telefono %}<small class="field-error">{{ errors.telefono }}</small>{% endif %}
+            </label>
+
+            <label class="form-field" for="email">
+                <span>Correo</span>
+                <input id="email" name="email" type="email" maxlength="120" value="{{ form_data.email|default('', true) }}">
+                {% if errors.email %}<small class="field-error">{{ errors.email }}</small>{% endif %}
+            </label>
+        </div>
+
+        <label class="form-field" for="direccion">
+            <span>Dirección</span>
+            <textarea id="direccion" name="direccion" rows="3" maxlength="255">{{ form_data.direccion|default('', true) }}</textarea>
+        </label>
+
+        <div class="form-actions">
+            <a class="secondary-button button-link" href="{{ url_for('pacientes.index') }}">Cancelar</a>
+            <button type="submit">{{ submit_label }}</button>
+        </div>
+    </form>
+</section>
+{% endblock %}

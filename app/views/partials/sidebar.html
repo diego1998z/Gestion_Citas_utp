@@ -1,0 +1,52 @@
+{% set endpoint = request.endpoint or "" %}
+
+<aside class="app-sidebar" aria-label="Navegación principal">
+    <a class="sidebar-brand" href="{{ url_for('home.index') }}">
+        <span class="sidebar-brand-mark" aria-hidden="true">CUC</span>
+        <span>
+            <strong>Clínica Universitaria</strong>
+            <small>Gestión de Citas</small>
+        </span>
+    </a>
+
+    <nav class="sidebar-nav">
+        <a class="sidebar-link {{ 'is-active' if endpoint == 'home.index' else '' }}" href="{{ url_for('home.index') }}">
+            <span aria-hidden="true">▦</span>
+            Dashboard
+        </a>
+        <a class="sidebar-link {{ 'is-active' if endpoint.startswith('pacientes.') else '' }}" href="{{ url_for('pacientes.index') }}">
+            <span aria-hidden="true">👥</span>
+            Pacientes
+        </a>
+        {% if current_user and current_user.rol == "ADMINISTRADOR" %}
+            <a class="sidebar-link {{ 'is-active' if endpoint.startswith('medicos.') else '' }}" href="{{ url_for('medicos.index') }}">
+                <span aria-hidden="true">🩺</span>
+                Médicos
+            </a>
+        {% endif %}
+        <a class="sidebar-link {{ 'is-active' if endpoint.startswith('citas.') else '' }}" href="{{ url_for('citas.programar') }}">
+            <span aria-hidden="true">📅</span>
+            Citas
+        </a>
+        <a class="sidebar-link {{ 'is-active' if endpoint.startswith('historial.') else '' }}" href="{{ url_for('historial.index') }}">
+            <span aria-hidden="true">📋</span>
+            Historial
+        </a>
+        <form method="post" action="{{ url_for('auth.logout') }}" class="sidebar-logout-form">
+            <button type="submit" class="sidebar-link sidebar-link-button">
+                <span aria-hidden="true">↩</span>
+                Logout
+            </button>
+        </form>
+    </nav>
+
+    <section class="sidebar-user" aria-label="Usuario actual">
+        <span class="user-avatar" aria-hidden="true">
+            {{ (current_user.nombre_completo or current_user.username or "U")[:1] }}
+        </span>
+        <div>
+            <strong>{{ current_user.nombre_completo or current_user.username }}</strong>
+            <small>{{ current_user.rol }}</small>
+        </div>
+    </section>
+</aside>

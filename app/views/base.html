@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Gestión de Citas Médicas{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body class="{% block body_class %}{% endblock %}">
+    {% block site_header %}
+    <header class="site-header">
+        <nav class="nav">
+            <a class="brand" href="{{ url_for('home.index') }}">Clínica Universitaria de Comas</a>
+            {% if current_user %}
+                <span class="nav-user">{{ current_user.nombre_completo }} · {{ current_user.rol }}</span>
+                <form method="post" action="{{ url_for('auth.logout') }}" class="nav-form">
+                    <button type="submit" class="link-button">Cerrar sesión</button>
+                </form>
+            {% else %}
+                <a href="{{ url_for('auth.login') }}">Login</a>
+            {% endif %}
+        </nav>
+    </header>
+    {% endblock %}
+
+    {% block main %}
+    <main class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <section class="messages" aria-label="Mensajes del sistema">
+                    {% for category, message in messages %}
+                        <p class="message message-{{ category }}">{{ message }}</p>
+                    {% endfor %}
+                </section>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+    {% endblock %}
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
