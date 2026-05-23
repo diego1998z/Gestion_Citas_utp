@@ -1,120 +1,116 @@
 {% extends "base.html" %}
 
-{% block title %}Login | Clínica Universitaria de Comas{% endblock %}
+{% block title %}Iniciar sesión | Clínica Universitaria de Comas{% endblock %}
+{% block body_class %}bg-background min-h-screen flex items-center justify-center p-4{% endblock %}
+{% block site_header %}{% endblock %}
 
-{% block content %}
-<section class="login-page" aria-labelledby="login-title">
-    <div class="login-hero-card">
-        <div class="login-brand-mark" aria-hidden="true">CUC</div>
-        <p class="login-eyebrow">Sistema de Gestión de Citas Médicas</p>
-        <h1 id="login-title">Clínica Universitaria de Comas</h1>
-        <p class="login-hero-text">
-            Accedé al panel para gestionar pacientes, médicos, horarios e historial de atención.
-        </p>
+{% block main %}
+<div class="fixed inset-0 z-0 overflow-hidden" aria-hidden="true">
+    <img src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=1920&q=80" alt="" class="w-full h-full object-cover opacity-20 filter blur-sm">
+    <div class="absolute inset-0 bg-gradient-to-br from-primary/10 to-background/90"></div>
+</div>
 
-        <div class="login-feature-list" aria-label="Funciones principales del sistema">
-            <article>
-                <span aria-hidden="true">✓</span>
-                <div>
-                    <strong>Agenda médica</strong>
-                    <small>Disponibilidad, programación y reprogramación de citas.</small>
+<main class="relative z-10 w-full flex items-center justify-center">
+    <section class="grid lg:grid-cols-2 max-w-5xl w-full bg-white rounded-xl shadow-[0_16px_40px_-12px_rgba(30,58,138,0.1)] overflow-hidden">
+        <aside class="hidden lg:flex flex-col justify-between p-12 !bg-[#1e3a8a] relative overflow-hidden isolate">
+            <div class="relative z-10">
+                <div class="flex items-center gap-3">
+                    <span class="material-symbols-rounded text-4xl text-white" aria-hidden="true">local_hospital</span>
+                    <p class="text-xl font-black text-white">Clínica Universitaria de Comas</p>
                 </div>
-            </article>
-            <article>
-                <span aria-hidden="true">✓</span>
-                <div>
-                    <strong>Roles protegidos</strong>
-                    <small>Acceso real validado por sesión y permisos del sistema.</small>
+
+                <div class="mt-20 max-w-md">
+                    <h1 class="text-5xl font-black leading-tight tracking-[-0.04em] text-white">Excelencia Médica a su Alcance</h1>
+                    <p class="mt-6 text-base font-medium leading-7 text-white">Administre el acceso institucional desde una interfaz clara, segura y confiable.</p>
                 </div>
-            </article>
-            <article>
-                <span aria-hidden="true">✓</span>
-                <div>
-                    <strong>Historial clínico</strong>
-                    <small>Seguimiento ordenado de la atención del paciente.</small>
-                </div>
-            </article>
-        </div>
-    </div>
-
-    <div class="login-form-card">
-        <div class="login-form-header">
-            <p class="login-eyebrow">Bienvenido</p>
-            <h2>Iniciar sesión</h2>
-            <p>Usá tu usuario del sistema para ingresar.</p>
-        </div>
-
-        <div class="role-selector" aria-label="Selector visual de rol">
-            <button class="role-option is-selected" type="button" data-role-option="ADMINISTRADOR">
-                Administrador
-            </button>
-            <button class="role-option" type="button" data-role-option="RECEPCIONISTA">
-                Recepción
-            </button>
-            <button class="role-option" type="button" data-role-option="MEDICO">
-                Médico
-            </button>
-        </div>
-        <p class="role-helper">
-            El rol es visual: la autorización real se toma desde la base de datos al iniciar sesión.
-        </p>
-
-        <form
-            method="post"
-            action="{{ url_for('auth.login') }}{% if request.args.get('next') %}?next={{ request.args.get('next')|urlencode }}{% endif %}"
-            class="login-form"
-            novalidate
-        >
-            <input id="rol" name="rol" type="hidden" value="ADMINISTRADOR">
-
-            <div class="form-field">
-                <label for="username">Usuario</label>
-                <input
-                    id="username"
-                    name="username"
-                    type="text"
-                    autocomplete="username"
-                    maxlength="50"
-                    value="{{ form_data.username if form_data else '' }}"
-                    placeholder="Ej. admin"
-                    required
-                    {% if errors and errors.username %}aria-describedby="username-error"{% endif %}
-                >
-                {% if errors and errors.username %}
-                    <p id="username-error" class="field-error">{{ errors.username }}</p>
-                {% endif %}
             </div>
 
-            <div class="form-field">
-                <label for="password">Contraseña</label>
-                <div class="password-field">
-                    <input
-                        id="password"
-                        name="password"
-                        type="password"
-                        autocomplete="current-password"
-                        maxlength="128"
-                        placeholder="Ingresá tu contraseña"
-                        required
-                        {% if errors and errors.password %}aria-describedby="password-error"{% endif %}
-                    >
-                    <button
-                        class="password-toggle"
-                        type="button"
-                        data-password-toggle
-                        aria-controls="password"
-                        aria-label="Mostrar contraseña"
-                    >
-                        Mostrar
+            <div class="relative z-10">
+                <div class="flex items-center gap-4 rounded-xl border border-primary bg-primary p-4">
+                    <span class="material-symbols-rounded grid h-12 w-12 place-items-center rounded-lg bg-white text-primary text-3xl" aria-hidden="true">encrypted</span>
+                    <div>
+                        <h2 class="text-lg font-black text-white">Acceso Seguro Encriptado</h2>
+                        <p class="mt-1 text-sm font-medium leading-6 text-white">Credenciales protegidas y autorización por roles.</p>
+                    </div>
+                </div>
+            </div>
+
+            <span class="material-symbols-rounded pointer-events-none absolute -bottom-8 -right-6 z-0 text-[12rem] text-[#60a5fa]" aria-hidden="true">health_and_safety</span>
+        </aside>
+
+        <section class="!bg-white p-8 md:p-12 lg:p-16 flex flex-col justify-center relative z-10 h-full min-h-[640px]">
+            <div class="mx-auto w-full max-w-md">
+                <div class="mb-8">
+                    <p class="text-sm font-black uppercase tracking-[0.2em] text-secondary">Bienvenido</p>
+                    <h2 class="mt-3 text-4xl font-black tracking-[-0.04em] text-primary">Iniciar Sesión</h2>
+                    <p class="mt-3 text-sm font-medium leading-6 text-on-surface-variant">Ingrese sus credenciales para acceder al panel.</p>
+                </div>
+
+                <form method="post" action="{{ url_for('auth.login', next=request.args.get('next')) if request.args.get('next') else url_for('auth.login') }}" class="grid gap-5" novalidate>
+                    <input id="rol" name="rol" type="hidden" value="ADMINISTRADOR">
+
+                    <div class="grid grid-cols-3 gap-3" aria-label="Selector visual de rol">
+                        <button type="button" data-role-option="ADMINISTRADOR" aria-pressed="true" class="rounded-lg border border-primary bg-primary px-3 py-3 text-center text-xs font-black text-white shadow-sm transition hover:bg-secondary">
+                            <span class="material-symbols-rounded mx-auto mb-1 block text-2xl" aria-hidden="true">admin_panel_settings</span>
+                            <span>Administrador</span>
+                        </button>
+                        <button type="button" data-role-option="MEDICO" aria-pressed="false" class="rounded-lg border border-outline-variant bg-surface px-3 py-3 text-center text-xs font-black text-on-surface-variant shadow-sm transition hover:border-primary hover:text-primary">
+                            <span class="material-symbols-rounded mx-auto mb-1 block text-2xl" aria-hidden="true">medical_services</span>
+                            <span>Médico</span>
+                        </button>
+                        <button type="button" data-role-option="RECEPCIONISTA" aria-pressed="false" class="rounded-lg border border-outline-variant bg-surface px-3 py-3 text-center text-xs font-black text-on-surface-variant shadow-sm transition hover:border-primary hover:text-primary">
+                            <span class="material-symbols-rounded mx-auto mb-1 block text-2xl" aria-hidden="true">support_agent</span>
+                            <span>Recepcionista</span>
+                        </button>
+                    </div>
+
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            <section class="grid gap-3" aria-label="Mensajes del sistema">
+                                {% for category, message in messages %}
+                                    <p class="rounded-lg border px-4 py-3 text-sm font-bold {{ 'border-red-200 bg-red-50 text-red-700' if category == 'error' else 'border-emerald-200 bg-emerald-50 text-emerald-700' if category == 'success' else 'border-blue-200 bg-blue-50 text-primary' }}">{{ message }}</p>
+                                {% endfor %}
+                            </section>
+                        {% endif %}
+                    {% endwith %}
+
+                    <label class="grid gap-2" for="username">
+                        <span class="text-sm font-black text-on-surface">Nombre de usuario</span>
+                        <span class="flex min-h-14 items-center gap-3 rounded-lg border border-outline-variant bg-surface px-4 transition focus-within:border-primary focus-within:ring-4 focus-within:ring-primary/10">
+                            <span class="material-symbols-rounded text-outline" aria-hidden="true">person</span>
+                            <input id="username" name="username" type="text" autocomplete="username" maxlength="50" value="{{ form_data.username if form_data else '' }}" placeholder="Ingrese su usuario" required {% if errors and errors.username %}aria-describedby="username-error"{% endif %} class="min-w-0 flex-1 border-0 bg-transparent py-3 text-sm font-semibold text-on-surface outline-none placeholder:text-outline/70">
+                        </span>
+                        {% if errors and errors.username %}
+                            <small id="username-error" class="text-sm font-bold text-red-600">{{ errors.username }}</small>
+                        {% endif %}
+                    </label>
+
+                    <label class="grid gap-2" for="password">
+                        <span class="text-sm font-black text-on-surface">Contraseña</span>
+                        <span class="flex min-h-14 items-center gap-3 rounded-lg border border-outline-variant bg-surface px-4 transition focus-within:border-primary focus-within:ring-4 focus-within:ring-primary/10">
+                            <span class="material-symbols-rounded text-outline" aria-hidden="true">lock</span>
+                            <input id="password" name="password" type="password" autocomplete="current-password" maxlength="128" placeholder="Ingrese su contraseña" required {% if errors and errors.password %}aria-describedby="password-error"{% endif %} class="min-w-0 flex-1 border-0 bg-transparent py-3 text-sm font-semibold text-on-surface outline-none placeholder:text-outline/70">
+                            <button type="button" data-password-toggle aria-controls="password" aria-label="Mostrar contraseña" class="inline-flex shrink-0 items-center justify-center rounded-lg px-2 py-2 text-primary transition hover:bg-primary/10">
+                                <span class="password-toggle-icon material-symbols-rounded text-xl" aria-hidden="true">visibility</span>
+                                <span class="password-toggle-label sr-only">Mostrar</span>
+                            </button>
+                        </span>
+                        {% if errors and errors.password %}
+                            <small id="password-error" class="text-sm font-bold text-red-600">{{ errors.password }}</small>
+                        {% endif %}
+                    </label>
+
+                    <button type="submit" class="w-full bg-primary text-black py-4 rounded-lg inline-flex items-center justify-center gap-2 text-base font-black shadow-[0_18px_38px_rgba(0,35,111,0.22)] transition hover:bg-secondary hover:-translate-y-0.5">
+                        <span>Ingresar</span>
+                        <span class="material-symbols-rounded" aria-hidden="true">arrow_forward</span>
                     </button>
-                </div>
-                {% if errors and errors.password %}
-                    <p id="password-error" class="field-error">{{ errors.password }}</p>
-                {% endif %}
-            </div>
+                </form>
 
-            <button class="login-submit" type="submit">Ingresar al sistema</button>
-        </form>
-    </div>
-</section>
+                <footer class="mt-8 text-center text-sm font-medium text-on-surface-variant">
+                    <p>© 2026 Clínica Universitaria de Comas</p>
+                </footer>
+            </div>
+        </section>
+    </section>
+</main>
 {% endblock %}

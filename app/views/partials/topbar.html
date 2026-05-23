@@ -1,13 +1,20 @@
-<header class="app-topbar">
+<header class="sticky top-0 z-20 flex flex-col gap-4 border-b border-outline-variant/70 bg-white/90 px-4 py-4 shadow-[0_10px_28px_rgba(0,35,111,0.06)] backdrop-blur md:flex-row md:items-center md:justify-between lg:px-8">
     <div>
-        <p class="page-kicker">{{ page_kicker|default("Clínica Universitaria de Comas") }}</p>
-        <h1>{{ page_title|default("Panel de control") }}</h1>
+        <p class="text-xs font-black uppercase tracking-[0.14em] text-secondary">{{ page_kicker|default("Clínica Universitaria de Comas") }}</p>
+        <h1 class="mt-1 text-2xl font-black tracking-[-0.045em] text-primary md:text-3xl">{{ page_title|default("Panel de control") }}</h1>
     </div>
 
-    <div class="topbar-actions">
-        <span class="topbar-date">{{ current_user.nombre_completo or current_user.username }}</span>
-        <form method="post" action="{{ url_for('auth.logout') }}" class="nav-form">
-            <button type="submit" class="secondary-button">Cerrar sesión</button>
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <label class="relative hidden md:block" aria-label="Búsqueda visual">
+            <span class="material-symbols-rounded pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-outline" aria-hidden="true">search</span>
+            <input type="search" placeholder="Buscar..." class="h-11 w-64 rounded-full border border-outline-variant bg-white py-2 pl-10 pr-4 text-sm font-semibold text-slate-700 shadow-sm outline-none transition focus:border-secondary-container focus:ring-4 focus:ring-blue-200/70">
+        </label>
+        <span class="inline-flex items-center gap-2 rounded-full border border-outline-variant/70 bg-white px-4 py-2 text-sm font-extrabold text-slate-600 shadow-sm">
+            <span class="material-symbols-rounded text-secondary" aria-hidden="true">account_circle</span>
+            {{ current_user.nombre_completo or current_user.username }}
+        </span>
+        <form method="post" action="{{ url_for('auth.logout') }}" class="m-0">
+            <button type="submit" class="rounded-full border border-outline-variant bg-white px-4 py-2 text-sm font-black text-primary shadow-sm transition hover:border-secondary-container hover:bg-blue-50">Cerrar sesión</button>
         </form>
     </div>
 </header>

@@ -1,52 +1,61 @@
 {% set endpoint = request.endpoint or "" %}
+{% set link_base = "flex min-h-12 items-center gap-3 rounded-2xl px-4 py-3 text-sm font-extrabold transition hover:bg-white/[0.13] hover:text-white hover:shadow-[inset_3px_0_0_#fff]" %}
+{% set link_idle = "text-blue-100" %}
+{% set link_active = "bg-white/15 text-white shadow-[inset_3px_0_0_#fff]" %}
 
-<aside class="app-sidebar" aria-label="Navegación principal">
-    <a class="sidebar-brand" href="{{ url_for('home.index') }}">
-        <span class="sidebar-brand-mark" aria-hidden="true">CUC</span>
-        <span>
-            <strong>Clínica Universitaria</strong>
-            <small>Gestión de Citas</small>
+<aside class="sticky top-0 z-30 flex max-h-screen min-h-screen flex-col overflow-y-auto bg-[radial-gradient(circle_at_24%_0%,rgba(33,112,228,0.38),transparent_15rem),linear-gradient(180deg,#00236f_0%,#071d58_100%)] p-5 text-blue-50 shadow-sidebar max-lg:static max-lg:min-h-0 max-lg:max-h-none" aria-label="Navegación principal">
+    <a class="flex items-center gap-3 pb-5 text-white" href="{{ url_for('home.index') }}">
+        <span class="material-symbols-rounded grid size-12 shrink-0 place-items-center rounded-2xl border border-white/20 bg-white/15 text-2xl shadow-lg" aria-hidden="true">local_hospital</span>
+        <span class="min-w-0">
+            <strong class="block truncate text-base font-black leading-tight">Clínica Universitaria</strong>
+            <small class="block text-xs font-bold text-blue-200">Gestión de Citas</small>
         </span>
     </a>
 
-    <nav class="sidebar-nav">
-        <a class="sidebar-link {{ 'is-active' if endpoint == 'home.index' else '' }}" href="{{ url_for('home.index') }}">
-            <span aria-hidden="true">▦</span>
+    <nav class="grid gap-2 pt-2 max-lg:grid-cols-2 sm:max-lg:grid-cols-3" aria-label="Módulos">
+        <a class="{{ link_base }} {{ link_active if endpoint == 'home.index' else link_idle }}" href="{{ url_for('home.index') }}">
+            <span class="material-symbols-rounded text-[1.35rem]" aria-hidden="true">dashboard</span>
             Dashboard
         </a>
-        <a class="sidebar-link {{ 'is-active' if endpoint.startswith('pacientes.') else '' }}" href="{{ url_for('pacientes.index') }}">
-            <span aria-hidden="true">👥</span>
+        <a class="{{ link_base }} {{ link_active if endpoint.startswith('pacientes.') else link_idle }}" href="{{ url_for('pacientes.index') }}">
+            <span class="material-symbols-rounded text-[1.35rem]" aria-hidden="true">groups</span>
             Pacientes
         </a>
         {% if current_user and current_user.rol == "ADMINISTRADOR" %}
-            <a class="sidebar-link {{ 'is-active' if endpoint.startswith('medicos.') else '' }}" href="{{ url_for('medicos.index') }}">
-                <span aria-hidden="true">🩺</span>
+            <a class="{{ link_base }} {{ link_active if endpoint.startswith('medicos.') else link_idle }}" href="{{ url_for('medicos.index') }}">
+                <span class="material-symbols-rounded text-[1.35rem]" aria-hidden="true">medical_services</span>
                 Médicos
             </a>
         {% endif %}
-        <a class="sidebar-link {{ 'is-active' if endpoint.startswith('citas.') else '' }}" href="{{ url_for('citas.programar') }}">
-            <span aria-hidden="true">📅</span>
+        <a class="{{ link_base }} {{ link_active if endpoint.startswith('citas.') else link_idle }}" href="{{ url_for('citas.index') if current_user and current_user.rol == 'MEDICO' else url_for('citas.programar') }}">
+            <span class="material-symbols-rounded text-[1.35rem]" aria-hidden="true">calendar_month</span>
             Citas
         </a>
-        <a class="sidebar-link {{ 'is-active' if endpoint.startswith('historial.') else '' }}" href="{{ url_for('historial.index') }}">
-            <span aria-hidden="true">📋</span>
+        <a class="{{ link_base }} {{ link_active if endpoint.startswith('historial.') else link_idle }}" href="{{ url_for('historial.index') }}">
+            <span class="material-symbols-rounded text-[1.35rem]" aria-hidden="true">assignment</span>
             Historial
         </a>
-        <form method="post" action="{{ url_for('auth.logout') }}" class="sidebar-logout-form">
-            <button type="submit" class="sidebar-link sidebar-link-button">
-                <span aria-hidden="true">↩</span>
+        {% if current_user and current_user.rol == "ADMINISTRADOR" %}
+            <a class="{{ link_base }} {{ link_active if endpoint.startswith('reportes.') else link_idle }}" href="{{ url_for('reportes.citas') }}">
+                <span class="material-symbols-rounded text-[1.35rem]" aria-hidden="true">analytics</span>
+                Reportes
+            </a>
+        {% endif %}
+        <form method="post" action="{{ url_for('auth.logout') }}" class="m-0">
+            <button type="submit" class="{{ link_base }} {{ link_idle }} w-full border-0 bg-transparent text-left hover:bg-white/[0.13]">
+                <span class="material-symbols-rounded text-[1.35rem]" aria-hidden="true">logout</span>
                 Logout
             </button>
         </form>
     </nav>
 
-    <section class="sidebar-user" aria-label="Usuario actual">
-        <span class="user-avatar" aria-hidden="true">
+    <section class="mt-auto flex items-center gap-3 rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur max-lg:mt-5" aria-label="Usuario actual">
+        <span class="grid size-10 shrink-0 place-items-center rounded-full bg-white text-sm font-black uppercase text-primary" aria-hidden="true">
             {{ (current_user.nombre_completo or current_user.username or "U")[:1] }}
         </span>
-        <div>
-            <strong>{{ current_user.nombre_completo or current_user.username }}</strong>
-            <small>{{ current_user.rol }}</small>
+        <div class="min-w-0">
+            <strong class="block truncate text-sm font-black text-white">{{ current_user.nombre_completo or current_user.username }}</strong>
+            <small class="block text-xs font-bold text-blue-200">{{ current_user.rol }}</small>
         </div>
     </section>
 </aside>

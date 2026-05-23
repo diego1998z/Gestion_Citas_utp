@@ -4,99 +4,50 @@
 {% block title %}Citas Médicas | Gestión de Citas Médicas{% endblock %}
 
 {% block content %}
-{{ ui.page_hero(
-    "Agenda médica",
-    "Citas médicas",
-    "Listado real de citas con acciones de cancelación, notificación, reprogramación y atención según rol.",
-    "Programar cita" if current_user.rol in ["ADMINISTRADOR", "RECEPCIONISTA"] else None,
-    url_for('citas.programar')
-) }}
-
+{{ ui.page_hero("Agenda médica", "Citas médicas", "Listado real de citas con acciones de cancelación, notificación, reprogramación y atención según rol.", "Programar cita" if current_user.rol in ["ADMINISTRADOR", "RECEPCIONISTA"] else None, url_for('citas.programar')) }}
 {{ ui.metric_grid(indicadores, compact=True, aria_label="Indicadores de citas") }}
 
-<article class="panel-card">
-    <div class="panel-header">
-        <div>
-            <p class="section-eyebrow">Agenda</p>
-            <h3>Citas registradas</h3>
-        </div>
-        <form class="search-form" action="{{ url_for('citas.index') }}" method="get">
+<article class="rounded-[1.5rem] border border-outline-variant/70 bg-white p-5 shadow-soft">
+    <div class="mb-4 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div><p class="text-xs font-black uppercase tracking-[0.14em] text-secondary">Agenda</p><h3 class="mt-1 text-xl font-black tracking-tight text-primary">Citas registradas</h3></div>
+        <form action="{{ url_for('citas.index') }}" method="get" class="relative">
             <label class="sr-only" for="buscar-cita">Buscar cita</label>
-            <input id="buscar-cita" name="q" type="search" value="{{ busqueda }}" placeholder="Buscar por paciente, médico o estado">
+            <span class="material-symbols-rounded pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-outline" aria-hidden="true">search</span>
+            <input id="buscar-cita" name="q" type="search" value="{{ busqueda }}" placeholder="Buscar por paciente, médico o estado" class="h-11 w-full rounded-full border border-outline-variant bg-white py-2 pl-10 pr-4 text-sm font-semibold outline-none transition focus:border-secondary-container focus:ring-4 focus:ring-blue-200/70 lg:w-96">
         </form>
     </div>
 
-    <div class="responsive-table">
-        <table>
-            <thead>
-                <tr>
-                    <th>Código</th>
-                    <th>Fecha y hora</th>
-                    <th>Paciente</th>
-                    <th>Médico</th>
-                    <th>Especialidad</th>
-                    <th>Notificación</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
+    <div class="overflow-x-auto">
+        <table class="min-w-full border-collapse text-left text-sm">
+            <thead><tr class="border-b border-outline-variant/70 text-xs font-black uppercase tracking-wider text-outline"><th class="px-3 py-3">Código</th><th class="px-3 py-3">Fecha y hora</th><th class="px-3 py-3">Paciente</th><th class="px-3 py-3">Médico</th><th class="px-3 py-3">Especialidad</th><th class="px-3 py-3">Notificación</th><th class="px-3 py-3">Estado</th><th class="px-3 py-3">Acciones</th></tr></thead>
+            <tbody class="divide-y divide-outline-variant/60">
                 {% for cita in citas %}
                     {% set es_activa = cita.estado in ["PENDIENTE", "CONFIRMADA"] %}
-                    <tr>
-                        <td>{{ cita.codigo }}</td>
-                        <td>
-                            <strong>{{ cita.fecha }}</strong>
-                            <small class="table-muted">{{ cita.hora }}</small>
-                        </td>
-                        <td>
-                            {{ cita.paciente }}
-                            <small class="table-muted">DNI {{ cita.paciente_dni }}</small>
-                        </td>
-                        <td>{{ cita.medico }}</td>
-                        <td>{{ cita.especialidad }}</td>
-                        <td>
-                            {% if cita.notificado %}
-                                Sí
-                                {% if cita.fecha_notificacion %}
-                                    <small class="table-muted">{{ cita.fecha_notificacion }}</small>
-                                {% endif %}
-                            {% else %}
-                                No
-                            {% endif %}
-                        </td>
-                        <td>{{ ui.status_badge(cita.estado) }}</td>
-                        <td>
-                            <div class="inline-actions">
+                    <tr class="align-top transition hover:bg-blue-50/60">
+                        <td class="px-3 py-4 font-bold text-primary">{{ cita.codigo }}</td>
+                        <td class="px-3 py-4"><strong class="block font-black text-slate-800">{{ cita.fecha }}</strong><small class="block text-sm font-semibold text-slate-500">{{ cita.hora }}</small></td>
+                        <td class="px-3 py-4">{{ cita.paciente }}<small class="block text-sm font-semibold text-slate-500">DNI {{ cita.paciente_dni }}</small></td>
+                        <td class="px-3 py-4">{{ cita.medico }}</td><td class="px-3 py-4">{{ cita.especialidad }}</td>
+                        <td class="px-3 py-4">{% if cita.notificado %}Sí{% if cita.fecha_notificacion %}<small class="block text-sm font-semibold text-slate-500">{{ cita.fecha_notificacion }}</small>{% endif %}{% else %}No{% endif %}</td>
+                        <td class="px-3 py-4">{{ ui.status_badge(cita.estado) }}</td>
+                        <td class="px-3 py-4">
+                            <div class="flex min-w-56 flex-wrap items-center gap-2">
                                 {% if current_user.rol in ["ADMINISTRADOR", "RECEPCIONISTA"] and es_activa %}
-                                    {% if not cita.notificado %}
-                                        <form action="{{ url_for('citas.notificar', id_cita=cita.id_cita) }}" method="post">
-                                            <button class="compact-button secondary-button" type="submit">Notificar</button>
-                                        </form>
-                                    {% endif %}
-                                    <a class="button-link compact-button" href="{{ url_for('citas.reprogramar', id_cita=cita.id_cita) }}">Reprogramar</a>
-                                    <form action="{{ url_for('citas.cancelar', id_cita=cita.id_cita) }}" method="post">
-                                        <label class="sr-only" for="motivo-cancelacion-{{ cita.id_cita }}">Motivo</label>
-                                        <input id="motivo-cancelacion-{{ cita.id_cita }}" name="motivo_cancelacion" type="text" placeholder="Motivo" required>
-                                        <button class="compact-button" type="submit">Cancelar</button>
-                                    </form>
+                                    {% if not cita.notificado %}<form action="{{ url_for('citas.notificar', id_cita=cita.id_cita) }}" method="post"><button class="rounded-xl border border-outline-variant bg-white px-3 py-2 text-xs font-black text-primary hover:bg-blue-50" type="submit">Notificar</button></form>{% endif %}
+                                    <a class="rounded-xl border border-outline-variant bg-white px-3 py-2 text-xs font-black text-primary hover:bg-blue-50" href="{{ url_for('citas.reprogramar', id_cita=cita.id_cita) }}">Reprogramar</a>
+                                    <form action="{{ url_for('citas.cancelar', id_cita=cita.id_cita) }}" method="post" class="flex flex-wrap items-center gap-2"><label class="sr-only" for="motivo-cancelacion-{{ cita.id_cita }}">Motivo</label><input id="motivo-cancelacion-{{ cita.id_cita }}" name="motivo_cancelacion" type="text" placeholder="Motivo" required class="h-9 w-28 rounded-xl border border-outline-variant px-3 text-xs outline-none focus:border-secondary-container"><button class="rounded-xl bg-red-600 px-3 py-2 text-xs font-black text-white hover:bg-red-700" type="submit">Cancelar</button></form>
                                 {% endif %}
-
                                 {% if current_user.rol in ["ADMINISTRADOR", "MEDICO"] and es_activa %}
-                                    <a class="button-link compact-button" href="{{ url_for('historial.nuevo_desde_cita', id_cita=cita.id_cita) }}">Atender</a>
-                                    <form action="{{ url_for('citas.marcar_no_asistio', id_cita=cita.id_cita) }}" method="post">
-                                        <button class="compact-button secondary-button" type="submit">No asistió</button>
-                                    </form>
+                                    <a class="rounded-xl border border-outline-variant bg-white px-3 py-2 text-xs font-black text-primary hover:bg-blue-50" href="{{ url_for('historial.nuevo_desde_cita', id_cita=cita.id_cita) }}">Atender</a>
+                                    <form action="{{ url_for('citas.marcar_no_asistio', id_cita=cita.id_cita) }}" method="post"><button class="rounded-xl border border-outline-variant bg-white px-3 py-2 text-xs font-black text-primary hover:bg-blue-50" type="submit">No asistió</button></form>
                                 {% elif current_user.rol in ["ADMINISTRADOR", "MEDICO"] and cita.estado == "ATENDIDA" and not cita.tiene_historial %}
-                                    <a class="button-link compact-button" href="{{ url_for('historial.nuevo_desde_cita', id_cita=cita.id_cita) }}">Crear historial</a>
+                                    <a class="rounded-xl border border-outline-variant bg-white px-3 py-2 text-xs font-black text-primary hover:bg-blue-50" href="{{ url_for('historial.nuevo_desde_cita', id_cita=cita.id_cita) }}">Crear historial</a>
                                 {% endif %}
                             </div>
                         </td>
                     </tr>
                 {% else %}
-                    <tr>
-                        <td colspan="8">No hay citas registradas para mostrar.</td>
-                    </tr>
+                    <tr><td class="px-3 py-6 text-center font-semibold text-slate-500" colspan="8">No hay citas registradas para mostrar.</td></tr>
                 {% endfor %}
             </tbody>
         </table>

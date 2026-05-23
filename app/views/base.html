@@ -1,35 +1,79 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" class="h-full">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}Gestión de Citas Médicas{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet">
+    <script>
+        window.tailwind = window.tailwind || {};
+        window.tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],
+                    },
+                    colors: {
+                        primary: "#00236f",
+                        secondary: "#0058be",
+                        "secondary-container": "#2170e4",
+                        "primary-container": "#1e3a8a",
+                        "on-primary-container": "#ffffff",
+                        background: "#f7f9fb",
+                        surface: "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#f8fafc",
+                        "surface-container": "#eef2f7",
+                        "on-surface": "#111827",
+                        "on-surface-variant": "#5f6472",
+                        "secondary-fixed": "#dbeafe",
+                        "on-secondary-fixed": "#00236f",
+                        outline: "#757682",
+                        "outline-variant": "#c5c5d3",
+                    },
+                    boxShadow: {
+                        soft: "0 18px 45px rgba(0, 35, 111, 0.09)",
+                        card: "0 28px 80px rgba(0, 35, 111, 0.16)",
+                        sidebar: "12px 0 36px rgba(0, 35, 111, 0.14)",
+                    },
+                },
+            },
+        };
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
-<body class="{% block body_class %}{% endblock %}">
+<body class="min-h-screen bg-background font-sans text-slate-900 antialiased {% block body_class %}{% endblock %}">
     {% block site_header %}
-    <header class="site-header">
-        <nav class="nav">
-            <a class="brand" href="{{ url_for('home.index') }}">Clínica Universitaria de Comas</a>
+    <header class="bg-gradient-to-r from-primary to-primary-container text-white shadow-soft">
+        <nav class="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <a class="inline-flex items-center gap-3 text-sm font-black tracking-tight sm:text-base" href="{{ url_for('home.index') }}">
+                <span class="material-symbols-rounded grid size-10 place-items-center rounded-2xl bg-white/15 text-xl" aria-hidden="true">local_hospital</span>
+                Clínica Universitaria de Comas
+            </a>
             {% if current_user %}
-                <span class="nav-user">{{ current_user.nombre_completo }} · {{ current_user.rol }}</span>
-                <form method="post" action="{{ url_for('auth.logout') }}" class="nav-form">
-                    <button type="submit" class="link-button">Cerrar sesión</button>
-                </form>
+                <div class="flex flex-wrap items-center gap-3 text-sm font-bold text-blue-100">
+                    <span>{{ current_user.nombre_completo }} · {{ current_user.rol }}</span>
+                    <form method="post" action="{{ url_for('auth.logout') }}">
+                        <button type="submit" class="rounded-full border border-white/25 px-4 py-2 text-sm font-black text-white hover:bg-white/10">Cerrar sesión</button>
+                    </form>
+                </div>
             {% else %}
-                <a href="{{ url_for('auth.login') }}">Login</a>
+                <a class="rounded-full border border-white/25 px-4 py-2 text-sm font-black hover:bg-white/10" href="{{ url_for('auth.login') }}">Login</a>
             {% endif %}
         </nav>
     </header>
     {% endblock %}
 
     {% block main %}
-    <main class="container">
+    <main class="mx-auto w-full max-w-6xl px-4 py-8">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
-                <section class="messages" aria-label="Mensajes del sistema">
+                <section class="mb-5 grid gap-3" aria-label="Mensajes del sistema">
                     {% for category, message in messages %}
-                        <p class="message message-{{ category }}">{{ message }}</p>
+                        <p class="rounded-2xl border px-4 py-3 text-sm font-bold {{ 'border-red-200 bg-red-50 text-red-700' if category == 'error' else 'border-emerald-200 bg-emerald-50 text-emerald-700' if category == 'success' else 'border-blue-200 bg-blue-50 text-primary' }}">{{ message }}</p>
                     {% endfor %}
                 </section>
             {% endif %}

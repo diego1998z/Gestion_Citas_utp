@@ -4,62 +4,24 @@
 {% block title %}{{ page_title }} | Gestión de Citas Médicas{% endblock %}
 
 {% block content %}
-{{ ui.page_hero(
-    page_kicker,
-    page_title,
-    "Cargá datos consistentes del paciente. El controlador valida y PacienteModel persiste con consultas parametrizadas.",
-    "Volver al listado",
-    url_for("pacientes.index")
-) }}
+{{ ui.page_hero(page_kicker, page_title, "Cargá datos consistentes del paciente. El controlador valida y PacienteModel persiste con consultas parametrizadas.", "Volver al listado", url_for("pacientes.index")) }}
 
-<section class="panel-card">
-    <form class="appointment-form" action="{{ action_url }}" method="post" novalidate>
-        <div class="form-grid">
-            <label class="form-field" for="dni">
-                <span>DNI *</span>
-                <input id="dni" name="dni" type="text" maxlength="15" value="{{ form_data.dni|default('', true) }}" required>
-                {% if errors.dni %}<small class="field-error">{{ errors.dni }}</small>{% endif %}
-            </label>
-
-            <label class="form-field" for="fecha_nacimiento">
-                <span>Fecha de nacimiento</span>
-                <input id="fecha_nacimiento" name="fecha_nacimiento" type="date" value="{{ form_data.fecha_nacimiento|default('', true) }}">
-                {% if errors.fecha_nacimiento %}<small class="field-error">{{ errors.fecha_nacimiento }}</small>{% endif %}
-            </label>
-
-            <label class="form-field" for="nombres">
-                <span>Nombres *</span>
-                <input id="nombres" name="nombres" type="text" maxlength="100" value="{{ form_data.nombres|default('', true) }}" required>
-                {% if errors.nombres %}<small class="field-error">{{ errors.nombres }}</small>{% endif %}
-            </label>
-
-            <label class="form-field" for="apellidos">
-                <span>Apellidos *</span>
-                <input id="apellidos" name="apellidos" type="text" maxlength="100" value="{{ form_data.apellidos|default('', true) }}" required>
-                {% if errors.apellidos %}<small class="field-error">{{ errors.apellidos }}</small>{% endif %}
-            </label>
-
-            <label class="form-field" for="telefono">
-                <span>Teléfono</span>
-                <input id="telefono" name="telefono" type="text" maxlength="20" value="{{ form_data.telefono|default('', true) }}">
-                {% if errors.telefono %}<small class="field-error">{{ errors.telefono }}</small>{% endif %}
-            </label>
-
-            <label class="form-field" for="email">
-                <span>Correo</span>
-                <input id="email" name="email" type="email" maxlength="120" value="{{ form_data.email|default('', true) }}">
-                {% if errors.email %}<small class="field-error">{{ errors.email }}</small>{% endif %}
-            </label>
+<section class="rounded-[1.5rem] border border-outline-variant/70 bg-white p-5 shadow-soft">
+    <form action="{{ action_url }}" method="post" novalidate class="grid gap-5">
+        <div class="grid gap-5 md:grid-cols-2">
+            <label class="grid gap-2" for="dni"><span class="text-sm font-black text-slate-800">DNI *</span><input id="dni" name="dni" type="text" maxlength="15" value="{{ form_data.dni|default('', true) }}" required class="rounded-2xl border border-outline-variant bg-white px-4 py-3 outline-none transition focus:border-secondary-container focus:ring-4 focus:ring-blue-200/70">{% if errors.dni %}<small class="text-sm font-bold text-red-600">{{ errors.dni }}</small>{% endif %}</label>
+            <label class="grid gap-2" for="fecha_nacimiento"><span class="text-sm font-black text-slate-800">Fecha de nacimiento</span><input id="fecha_nacimiento" name="fecha_nacimiento" type="date" value="{{ form_data.fecha_nacimiento|default('', true) }}" class="rounded-2xl border border-outline-variant bg-white px-4 py-3 outline-none transition focus:border-secondary-container focus:ring-4 focus:ring-blue-200/70">{% if errors.fecha_nacimiento %}<small class="text-sm font-bold text-red-600">{{ errors.fecha_nacimiento }}</small>{% endif %}</label>
+            <label class="grid gap-2" for="nombres"><span class="text-sm font-black text-slate-800">Nombres *</span><input id="nombres" name="nombres" type="text" maxlength="100" value="{{ form_data.nombres|default('', true) }}" required class="rounded-2xl border border-outline-variant bg-white px-4 py-3 outline-none transition focus:border-secondary-container focus:ring-4 focus:ring-blue-200/70">{% if errors.nombres %}<small class="text-sm font-bold text-red-600">{{ errors.nombres }}</small>{% endif %}</label>
+            <label class="grid gap-2" for="apellidos"><span class="text-sm font-black text-slate-800">Apellidos *</span><input id="apellidos" name="apellidos" type="text" maxlength="100" value="{{ form_data.apellidos|default('', true) }}" required class="rounded-2xl border border-outline-variant bg-white px-4 py-3 outline-none transition focus:border-secondary-container focus:ring-4 focus:ring-blue-200/70">{% if errors.apellidos %}<small class="text-sm font-bold text-red-600">{{ errors.apellidos }}</small>{% endif %}</label>
+            <label class="grid gap-2" for="telefono"><span class="text-sm font-black text-slate-800">Teléfono</span><input id="telefono" name="telefono" type="text" maxlength="20" value="{{ form_data.telefono|default('', true) }}" class="rounded-2xl border border-outline-variant bg-white px-4 py-3 outline-none transition focus:border-secondary-container focus:ring-4 focus:ring-blue-200/70">{% if errors.telefono %}<small class="text-sm font-bold text-red-600">{{ errors.telefono }}</small>{% endif %}</label>
+            <label class="grid gap-2" for="email"><span class="text-sm font-black text-slate-800">Correo</span><input id="email" name="email" type="email" maxlength="120" value="{{ form_data.email|default('', true) }}" class="rounded-2xl border border-outline-variant bg-white px-4 py-3 outline-none transition focus:border-secondary-container focus:ring-4 focus:ring-blue-200/70">{% if errors.email %}<small class="text-sm font-bold text-red-600">{{ errors.email }}</small>{% endif %}</label>
         </div>
 
-        <label class="form-field" for="direccion">
-            <span>Dirección</span>
-            <textarea id="direccion" name="direccion" rows="3" maxlength="255">{{ form_data.direccion|default('', true) }}</textarea>
-        </label>
+        <label class="grid gap-2" for="direccion"><span class="text-sm font-black text-slate-800">Dirección</span><textarea id="direccion" name="direccion" rows="3" maxlength="255" class="rounded-2xl border border-outline-variant bg-white px-4 py-3 outline-none transition focus:border-secondary-container focus:ring-4 focus:ring-blue-200/70">{{ form_data.direccion|default('', true) }}</textarea></label>
 
-        <div class="form-actions">
-            <a class="secondary-button button-link" href="{{ url_for('pacientes.index') }}">Cancelar</a>
-            <button type="submit">{{ submit_label }}</button>
+        <div class="flex flex-col gap-3 sm:flex-row sm:justify-end">
+            <a class="inline-flex items-center justify-center rounded-2xl border border-outline-variant bg-white px-5 py-3 text-sm font-black text-primary transition hover:border-secondary-container hover:bg-blue-50" href="{{ url_for('pacientes.index') }}">Cancelar</a>
+            <button class="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-primary to-secondary-container px-5 py-3 text-sm font-black text-white shadow-[0_14px_30px_rgba(0,88,190,0.2)]" type="submit">{{ submit_label }}</button>
         </div>
     </form>
 </section>

@@ -1,28 +1,30 @@
 {% extends "base.html" %}
 
-{% block body_class %}app-shell-body{% endblock %}
+{% block body_class %}overflow-x-hidden bg-[radial-gradient(circle_at_top_right,rgba(33,112,228,0.08),transparent_28rem),#f7f9fb]{% endblock %}
 
 {% block site_header %}{% endblock %}
 
 {% block main %}
-<div class="app-shell">
+<div class="min-h-screen lg:grid lg:grid-cols-[280px_minmax(0,1fr)]">
     {% include "partials/sidebar.html" %}
 
-    <div class="app-main">
+    <div class="min-w-0">
         {% include "partials/topbar.html" %}
 
-        <main class="app-content">
+        <main class="mx-auto w-full max-w-[1180px] px-4 py-6 sm:px-6 lg:py-8">
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
-                    <section class="messages" aria-label="Mensajes del sistema">
+                    <section class="mb-5 grid gap-3" aria-label="Mensajes del sistema">
                         {% for category, message in messages %}
-                            <p class="message message-{{ category }}">{{ message }}</p>
+                            <p class="rounded-2xl border px-4 py-3 text-sm font-bold shadow-sm {{ 'border-red-200 bg-red-50 text-red-700' if category == 'error' else 'border-emerald-200 bg-emerald-50 text-emerald-700' if category == 'success' else 'border-blue-200 bg-blue-50 text-primary' }}">{{ message }}</p>
                         {% endfor %}
                     </section>
                 {% endif %}
             {% endwith %}
 
-            {% block content %}{% endblock %}
+            <div class="space-y-6">
+                {% block content %}{% endblock %}
+            </div>
         </main>
     </div>
 </div>
