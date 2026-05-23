@@ -1,8 +1,9 @@
 from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
 from mysql.connector import Error as MySQLError
 
+from app.models.medico_model import MedicoModel
 from app.models.paciente_model import PacienteModel
-from app.utils.auth import roles_required
+from app.utils.auth import get_current_user, roles_required
 from app.utils.logger import get_logger, log_error_tecnico
 from app.utils.validators import validar_paciente_form
 
@@ -10,16 +11,22 @@ from app.utils.validators import validar_paciente_form
 pacientes_bp = Blueprint("pacientes", __name__)
 logger = get_logger(__name__)
 paciente_model = PacienteModel()
+medico_model = MedicoModel()
 
 
 @pacientes_bp.get("/pacientes")
-@roles_required("ADMINISTRADOR", "RECEPCIONISTA")
+@roles_required("ADMINISTRADOR", "RECEPCIONISTA", "MEDICO")
 def index():
     busqueda = (request.args.get("q") or "").strip()
     pacientes = []
+    usuario = get_current_user()
 
     try:
-        pacientes = paciente_model.listar(busqueda or None)
+        if usuario and usuario.get("rol") == "MEDICO":
+            id_medico = _obtener_id_medico_actual()
+            pacientes = paciente_model.listar_por_medico(id_medico, busqueda or None) if id_medico else []
+        else:
+            pacientes = paciente_model.listar(busqueda or None)
     except MySQLError:
         log_error_tecnico(logger, "Error listando pacientes")
         flash("No pudimos cargar pacientes. Verificá la conexión a la base de datos.", "error")
@@ -152,3 +159,16 @@ def _flash_error_mysql(error: MySQLError, mensaje_default: str) -> None:
         return
 
     flash(mensaje_default, "error")
+
+
+def _obtener_id_medico_actual() -> int | None:
+    usuario = get_current_user()
+    if not usuario or usuario.get("rol") != "MEDICO":
+        return None
+
+    try:
+        return medico_model.obtener_id_medico_por_usuario(int(usuario["id_usuario"]))
+    except (MySQLError, KeyError, TypeError, ValueError):
+        log_error_tecnico(logger, "Error obteniendo médico actual para pacientes")
+        flash("No pudimos validar tu perfil médico. Intentá nuevamente.", "error")
+        return None

@@ -30,9 +30,14 @@ historial_model = HistorialCitaModel()
 def index():
     busqueda = (request.args.get("q") or "").strip()
     citas = []
+    usuario = get_current_user()
 
     try:
-        citas = cita_model.listar(busqueda or None)
+        if usuario and usuario.get("rol") == "MEDICO":
+            id_medico = _obtener_id_medico_actual()
+            citas = cita_model.listar_por_medico(id_medico, busqueda or None) if id_medico else []
+        else:
+            citas = cita_model.listar(busqueda or None)
     except MySQLError:
         log_error_tecnico(logger, "Error listando citas")
         flash("No pudimos cargar las citas. Verificá la conexión a la base de datos.", "error")
@@ -192,6 +197,9 @@ def reprogramar(id_cita: int):
 @citas_bp.post("/citas/<int:id_cita>/atender")
 @roles_required("ADMINISTRADOR", "MEDICO")
 def atender(id_cita: int):
+    if not _puede_medico_operar_cita(id_cita):
+        return redirect(url_for("citas.index"))
+
     form_data, errors = validar_historial_form(request.form)
 
     if errors:
@@ -216,6 +224,9 @@ def atender(id_cita: int):
 @citas_bp.post("/citas/<int:id_cita>/no-asistio")
 @roles_required("ADMINISTRADOR", "MEDICO")
 def marcar_no_asistio(id_cita: int):
+    if not _puede_medico_operar_cita(id_cita):
+        return redirect(url_for("citas.index"))
+
     try:
         cita_model.marcar_no_asistio(id_cita)
     except ValueError as error:
@@ -284,6 +295,42 @@ def _obtener_id_recepcionista_actual() -> int | None:
     except MySQLError:
         log_error_tecnico(logger, "Error obteniendo recepcionista actual")
         return None
+
+
+def _obtener_id_medico_actual() -> int | None:
+    usuario = get_current_user()
+    if not usuario or usuario.get("rol") != "MEDICO":
+        return None
+
+    try:
+        return medico_model.obtener_id_medico_por_usuario(int(usuario["id_usuario"]))
+    except (MySQLError, KeyError, TypeError, ValueError):
+        log_error_tecnico(logger, "Error obteniendo médico actual")
+        flash("No pudimos validar tu perfil médico. Intentá nuevamente.", "error")
+        return None
+
+
+def _puede_medico_operar_cita(id_cita: int) -> bool:
+    usuario = get_current_user()
+    if not usuario or usuario.get("rol") != "MEDICO":
+        return True
+
+    id_medico = _obtener_id_medico_actual()
+    if not id_medico:
+        return False
+
+    try:
+        cita = cita_model.obtener_por_id_y_medico(id_cita, id_medico)
+    except MySQLError:
+        log_error_tecnico(logger, "Error validando pertenencia de cita")
+        flash("No pudimos validar la cita solicitada. Intentá nuevamente.", "error")
+        return False
+
+    if not cita:
+        flash("No tenés acceso a esa cita médica.", "error")
+        return False
+
+    return True
 
 
 def _crear_indicadores(citas: list[dict]) -> list[dict]:

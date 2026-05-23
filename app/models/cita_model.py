@@ -15,8 +15,25 @@ class CitaModel:
     """
 
     def listar(self, busqueda: str | None = None) -> list[dict[str, Any]]:
+        return self._listar_con_filtros(busqueda=busqueda)
+
+    def listar_por_medico(self, id_medico: int, filtros: dict[str, Any] | str | None = None) -> list[dict[str, Any]]:
+        busqueda = self._extraer_busqueda(filtros)
+        return self._listar_con_filtros(busqueda=busqueda, id_medico=id_medico)
+
+    def obtener_por_id(self, id_cita: int) -> dict[str, Any] | None:
+        return self._obtener_por_id_con_filtros(id_cita=id_cita)
+
+    def obtener_por_id_y_medico(self, id_cita: int, id_medico: int) -> dict[str, Any] | None:
+        return self._obtener_por_id_con_filtros(id_cita=id_cita, id_medico=id_medico)
+
+    def _listar_con_filtros(self, busqueda: str | None = None, id_medico: int | None = None) -> list[dict[str, Any]]:
         filtros: list[str] = []
         parametros: list[Any] = []
+
+        if id_medico is not None:
+            filtros.append("c.id_medico = %s")
+            parametros.append(id_medico)
 
         if busqueda:
             termino = f"%{busqueda.strip()}%"
@@ -77,10 +94,19 @@ class CitaModel:
             )
             return cursor.fetchall()
 
-    def obtener_por_id(self, id_cita: int) -> dict[str, Any] | None:
+    def _obtener_por_id_con_filtros(self, id_cita: int, id_medico: int | None = None) -> dict[str, Any] | None:
+        filtros = ["c.id_cita = %s"]
+        parametros: list[Any] = [id_cita]
+
+        if id_medico is not None:
+            filtros.append("c.id_medico = %s")
+            parametros.append(id_medico)
+
+        where_sql = " AND ".join(filtros)
+
         with get_cursor(dictionary=True) as (_, cursor):
             cursor.execute(
-                """
+                f"""
                 SELECT
                     c.id_cita,
                     CONCAT('CIT-', LPAD(c.id_cita, 4, '0')) AS codigo,
@@ -110,12 +136,23 @@ class CitaModel:
                 INNER JOIN usuario_sistema um ON um.id_usuario = m.id_usuario
                 INNER JOIN especialidad e ON e.id_especialidad = m.id_especialidad
                 LEFT JOIN historial_cita hc ON hc.id_cita = c.id_cita
-                WHERE c.id_cita = %s
+                WHERE {where_sql}
                 LIMIT 1
                 """,
-                (id_cita,),
+                tuple(parametros),
             )
             return cursor.fetchone()
+
+    def _extraer_busqueda(self, filtros: dict[str, Any] | str | None) -> str | None:
+        if filtros is None:
+            return None
+
+        if isinstance(filtros, str):
+            busqueda = filtros.strip()
+            return busqueda or None
+
+        busqueda = str(filtros.get("busqueda") or filtros.get("q") or "").strip()
+        return busqueda or None
 
     def listar_horarios_disponibles(self, id_medico: int | None = None) -> list[dict[str, Any]]:
         filtros = ["h.estado = 'DISPONIBLE'"]

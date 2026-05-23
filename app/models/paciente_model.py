@@ -11,8 +11,20 @@ class PacienteModel:
     """
 
     def listar(self, busqueda: str | None = None) -> list[dict[str, Any]]:
+        return self._listar_con_filtros(busqueda=busqueda)
+
+    def listar_por_medico(self, id_medico: int, busqueda: str | None = None) -> list[dict[str, Any]]:
+        return self._listar_con_filtros(busqueda=busqueda, id_medico=id_medico)
+
+    def _listar_con_filtros(self, busqueda: str | None = None, id_medico: int | None = None) -> list[dict[str, Any]]:
         filtros: list[str] = []
         parametros: list[Any] = []
+
+        join_cita = ""
+        if id_medico is not None:
+            join_cita = "INNER JOIN cita c_medico ON c_medico.id_paciente = p.id_paciente"
+            filtros.append("c_medico.id_medico = %s")
+            parametros.append(id_medico)
 
         if busqueda:
             termino = f"%{busqueda.strip()}%"
@@ -52,12 +64,23 @@ class PacienteModel:
                         SELECT MAX(c.fecha)
                         FROM cita c
                         WHERE c.id_paciente = p.id_paciente
+                          AND (%s IS NULL OR c.id_medico = %s)
                     ) AS ultima_cita
                 FROM paciente p
+                {join_cita}
                 {where_sql}
+                GROUP BY
+                    p.id_paciente,
+                    p.dni,
+                    p.nombres,
+                    p.apellidos,
+                    p.telefono,
+                    p.email,
+                    p.direccion,
+                    p.fecha_nacimiento
                 ORDER BY p.apellidos ASC, p.nombres ASC
                 """,
-                tuple(parametros),
+                (id_medico, id_medico, *parametros),
             )
             return cursor.fetchall()
 

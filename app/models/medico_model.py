@@ -93,6 +93,34 @@ class MedicoModel:
             )
             return cursor.fetchone()
 
+    def obtener_por_usuario(self, id_usuario: int) -> dict[str, Any] | None:
+        with get_cursor(dictionary=True) as (_, cursor):
+            cursor.execute(
+                """
+                SELECT
+                    m.id_medico,
+                    m.id_usuario,
+                    m.id_especialidad,
+                    m.numero_colegiatura,
+                    u.username,
+                    u.nombres,
+                    u.apellidos,
+                    u.email,
+                    u.telefono,
+                    u.estado
+                FROM medico m
+                INNER JOIN usuario_sistema u ON u.id_usuario = m.id_usuario
+                WHERE m.id_usuario = %s
+                LIMIT 1
+                """,
+                (id_usuario,),
+            )
+            return cursor.fetchone()
+
+    def obtener_id_medico_por_usuario(self, id_usuario: int) -> int | None:
+        medico = self.obtener_por_usuario(id_usuario)
+        return int(medico["id_medico"]) if medico else None
+
     def crear(self, datos: dict[str, Any]) -> int:
         with transaction(dictionary=True) as cursor:
             cursor.execute(

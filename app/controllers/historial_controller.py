@@ -3,7 +3,8 @@ from mysql.connector import Error as MySQLError
 
 from app.models.cita_model import CitaModel
 from app.models.historial_cita_model import HistorialCitaModel
-from app.utils.auth import roles_required
+from app.models.medico_model import MedicoModel
+from app.utils.auth import get_current_user, roles_required
 from app.utils.logger import get_logger, log_error_tecnico
 from app.utils.validators import validar_historial_form
 
@@ -12,6 +13,7 @@ historial_bp = Blueprint("historial", __name__)
 logger = get_logger(__name__)
 historial_model = HistorialCitaModel()
 cita_model = CitaModel()
+medico_model = MedicoModel()
 
 
 @historial_bp.get("/historial")
@@ -19,9 +21,14 @@ cita_model = CitaModel()
 def index():
     busqueda = (request.args.get("q") or "").strip()
     historiales = []
+    usuario = get_current_user()
 
     try:
-        historiales = historial_model.listar(busqueda or None)
+        if usuario and usuario.get("rol") == "MEDICO":
+            id_medico = _obtener_id_medico_actual()
+            historiales = historial_model.listar_por_medico(id_medico, busqueda or None) if id_medico else []
+        else:
+            historiales = historial_model.listar(busqueda or None)
     except MySQLError:
         log_error_tecnico(logger, "Error listando historial")
         flash("No pudimos cargar el historial de citas.", "error")
@@ -39,14 +46,25 @@ def index():
 @historial_bp.route("/historial/cita/<int:id_cita>/nuevo", methods=["GET", "POST"])
 @roles_required("ADMINISTRADOR", "MEDICO")
 def nuevo_desde_cita(id_cita: int):
+    usuario = get_current_user()
+
     try:
-        cita = cita_model.obtener_por_id(id_cita)
+        if usuario and usuario.get("rol") == "MEDICO":
+            id_medico = _obtener_id_medico_actual()
+            if not id_medico:
+                return redirect(url_for("citas.index"))
+            cita = cita_model.obtener_por_id_y_medico(id_cita, id_medico)
+        else:
+            cita = cita_model.obtener_por_id(id_cita)
     except MySQLError:
         log_error_tecnico(logger, "Error obteniendo cita para historial")
         flash("No pudimos cargar la cita solicitada.", "error")
         return redirect(url_for("citas.index"))
 
     if not cita:
+        if usuario and usuario.get("rol") == "MEDICO":
+            flash("No tenés acceso a esa cita médica.", "error")
+            return redirect(url_for("citas.index"))
         abort(404)
 
     if cita.get("tiene_historial"):
@@ -107,3 +125,16 @@ def _flash_error_mysql(error: MySQLError, mensaje_default: str) -> None:
         return
 
     flash(mensaje_default, "error")
+
+
+def _obtener_id_medico_actual() -> int | None:
+    usuario = get_current_user()
+    if not usuario or usuario.get("rol") != "MEDICO":
+        return None
+
+    try:
+        return medico_model.obtener_id_medico_por_usuario(int(usuario["id_usuario"]))
+    except (MySQLError, KeyError, TypeError, ValueError):
+        log_error_tecnico(logger, "Error obteniendo médico actual para historial")
+        flash("No pudimos validar tu perfil médico. Intentá nuevamente.", "error")
+        return None

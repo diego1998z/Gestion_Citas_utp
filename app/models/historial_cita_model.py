@@ -7,8 +7,18 @@ class HistorialCitaModel:
     """Acceso a datos de historiales clínicos generados desde citas."""
 
     def listar(self, busqueda: str | None = None) -> list[dict[str, Any]]:
+        return self._listar_con_filtros(busqueda=busqueda)
+
+    def listar_por_medico(self, id_medico: int, busqueda: str | None = None) -> list[dict[str, Any]]:
+        return self._listar_con_filtros(busqueda=busqueda, id_medico=id_medico)
+
+    def _listar_con_filtros(self, busqueda: str | None = None, id_medico: int | None = None) -> list[dict[str, Any]]:
         filtros: list[str] = []
         parametros: list[Any] = []
+
+        if id_medico is not None:
+            filtros.append("c.id_medico = %s")
+            parametros.append(id_medico)
 
         if busqueda:
             termino = f"%{busqueda.strip()}%"
