@@ -1,37 +1,112 @@
 # Sistema de Gestión de Citas Médicas
 
-MVP Flask + MySQL/InnoDB para la Clínica Universitaria de Comas.
+Sistema web MVC para la Clínica Universitaria de Comas. Permite registrar pacientes, administrar médicos y especialidades, configurar horarios, programar/cancelar/reprogramar citas, registrar atenciones en historial y consultar un reporte básico de citas.
 
-## Estado actual
+## Stack tecnológico
 
-Batch B deja implementada la seguridad transversal inicial:
+- Backend: Python + Flask.
+- Frontend: HTML, CSS y JavaScript server-rendered.
+- Base de datos: MySQL con motor InnoDB.
+- Arquitectura: MVC con Blueprints de Flask.
+- Seguridad: sesión Flask, roles, hashing de contraseñas con Werkzeug y consultas SQL parametrizadas.
 
-- estructura MVC,
-- app factory de Flask,
-- configuración MySQL por variables de entorno,
-- helpers de conexión/transacción,
-- templates base sin SQL,
-- schema inicial de base de datos,
-- login/logout con sesión Flask,
-- verificación de contraseña con Werkzeug,
-- decoradores `login_required` y `roles_required`,
-- errores amigables y logging interno en `logs/app.log`.
+## Estructura MVC
 
-Los CRUDs y flujos de citas se implementan en batches posteriores.
+```text
+app/
+  models/        # SQL parametrizado y transacciones
+  controllers/   # rutas, validación, reglas de negocio y RBAC
+  views/         # templates HTML sin conexión directa a BD
+  static/        # CSS, JS e imágenes
+config/          # configuración Flask/MySQL
+database/        # schema.sql y seed.sql
+docs/            # documentación técnica de entrega
+run.py           # punto de entrada de Flask
+```
 
-## Configuración mínima
+Regla central: las vistas no ejecutan SQL ni abren conexiones. Toda consulta pasa por controlador y modelo.
 
-1. Copiar `.env.example` a `.env`.
-2. Ajustar credenciales MySQL.
-3. Crear la base ejecutando `database/schema.sql`.
-4. Opcional: cargar `database/seed.sql`.
+## Instalación local
 
-## Usuario demo
+1. Crear entorno virtual:
 
-Si cargás `database/seed.sql`, queda disponible:
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
 
-- Usuario: `admin`
-- Contraseña: `Admin123*`
-- Rol: `ADMINISTRADOR`
+2. Instalar dependencias:
 
-No ejecutar build: este proyecto es Flask server-rendered y la guía del proyecto indica no hacer build después de cambios.
+```powershell
+pip install -r requirements.txt
+```
+
+3. Copiar configuración de ejemplo:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+4. Editar `.env` con tus credenciales MySQL:
+
+```env
+FLASK_APP=run.py
+FLASK_ENV=development
+SECRET_KEY=cambiar-esta-clave-en-produccion
+MYSQL_HOST=localhost
+MYSQL_PORT=3306
+MYSQL_USER=root
+MYSQL_PASSWORD=
+MYSQL_DATABASE=gestion_citas_medicas
+LOG_LEVEL=INFO
+```
+
+## Creación de base de datos
+
+Ejecutar los scripts SQL en este orden:
+
+```powershell
+mysql -u root -p < database/schema.sql
+mysql -u root -p gestion_citas_medicas < database/seed.sql
+```
+
+`schema.sql` crea la base `gestion_citas_medicas`, tablas InnoDB, claves primarias/foráneas, ENUMs e índices. `seed.sql` carga datos mínimos de demostración.
+
+## Usuarios demo
+
+Si cargás `database/seed.sql`:
+
+| Usuario | Contraseña | Rol | Registro relacionado |
+| --- | --- | --- | --- |
+| `admin` | `Admin123*` | `ADMINISTRADOR` | `administrador` |
+| `medico` | `Medico123*` | `MEDICO` | `medico` con especialidad `Medicina General` |
+| `recepcionista` | `Recepcion123*` | `RECEPCIONISTA` | `recepcionista` |
+
+## Ejecución local
+
+```powershell
+flask run
+```
+
+No hay paso de build: el proyecto usa Flask con templates renderizados en servidor.
+
+## Roles
+
+- `ADMINISTRADOR`: acceso a pacientes, médicos, especialidades, horarios, citas, historial y reportes.
+- `RECEPCIONISTA`: gestión operativa de pacientes y citas.
+- `MEDICO`: consulta de citas, atención y registro de historial.
+
+## Reglas de negocio principales
+
+- Validar disponibilidad del médico antes de programar una cita.
+- No permitir dos citas activas (`PENDIENTE` o `CONFIRMADA`) para el mismo médico, fecha y hora.
+- Cancelar una cita registra motivo y fecha de cancelación.
+- Notificar al paciente actualiza `notificado` y `fecha_notificacion`.
+- Reprogramar crea una nueva cita y marca la original como `REPROGRAMADA`.
+- El historial se genera desde una cita existente; `historial_cita` no duplica `id_paciente`.
+
+## Documentación complementaria
+
+- `docs/diccionario_datos.md`: tablas, campos y reglas principales.
+- `docs/mapa_endpoints.md`: rutas, método, rol y controlador.
+- `docs/checklist_validacion.md`: guía de validación manual y checklist técnico mínimo.

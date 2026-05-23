@@ -56,6 +56,7 @@ def register_blueprints(app: Flask) -> None:
     from app.controllers.home_controller import home_bp
     from app.controllers.medico_controller import medicos_bp
     from app.controllers.paciente_controller import pacientes_bp
+    from app.controllers.reporte_controller import reportes_bp
 
     app.register_blueprint(home_bp)
     app.register_blueprint(auth_bp)
@@ -63,6 +64,7 @@ def register_blueprints(app: Flask) -> None:
     app.register_blueprint(medicos_bp)
     app.register_blueprint(citas_bp)
     app.register_blueprint(historial_bp)
+    app.register_blueprint(reportes_bp)
 
 
 def register_template_context(app: Flask) -> None:
