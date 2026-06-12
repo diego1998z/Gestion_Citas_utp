@@ -223,6 +223,101 @@ ON DUPLICATE KEY UPDATE
     id_especialidad = VALUES(id_especialidad),
     numero_colegiatura = VALUES(numero_colegiatura);
 
+INSERT INTO horario (
+    id_medico,
+    fecha,
+    hora_inicio,
+    hora_fin,
+    estado
+)
+SELECT
+    m.id_medico,
+    '2026-06-15',
+    '08:00:00',
+    '12:00:00',
+    'DISPONIBLE'
+FROM medico m
+INNER JOIN usuario_sistema u ON u.id_usuario = m.id_usuario
+WHERE u.username = 'medico'
+ON DUPLICATE KEY UPDATE
+    estado = VALUES(estado);
+
+INSERT INTO horario (
+    id_medico,
+    fecha,
+    hora_inicio,
+    hora_fin,
+    estado
+)
+SELECT
+    m.id_medico,
+    '2026-06-15',
+    '09:00:00',
+    '13:00:00',
+    'DISPONIBLE'
+FROM medico m
+INNER JOIN usuario_sistema u ON u.id_usuario = m.id_usuario
+WHERE u.username = 'ana.huaman'
+ON DUPLICATE KEY UPDATE
+    estado = VALUES(estado);
+
+INSERT INTO horario (
+    id_medico,
+    fecha,
+    hora_inicio,
+    hora_fin,
+    estado
+)
+SELECT
+    m.id_medico,
+    '2026-06-16',
+    '08:00:00',
+    '12:00:00',
+    'DISPONIBLE'
+FROM medico m
+INNER JOIN usuario_sistema u ON u.id_usuario = m.id_usuario
+WHERE u.username = 'carlos.choque'
+ON DUPLICATE KEY UPDATE
+    estado = VALUES(estado);
+
+INSERT INTO horario (
+    id_medico,
+    fecha,
+    hora_inicio,
+    hora_fin,
+    estado
+)
+SELECT
+    m.id_medico,
+    '2026-06-16',
+    '14:00:00',
+    '18:00:00',
+    'DISPONIBLE'
+FROM medico m
+INNER JOIN usuario_sistema u ON u.id_usuario = m.id_usuario
+WHERE u.username = 'rosa.condori'
+ON DUPLICATE KEY UPDATE
+    estado = VALUES(estado);
+
+INSERT INTO horario (
+    id_medico,
+    fecha,
+    hora_inicio,
+    hora_fin,
+    estado
+)
+SELECT
+    m.id_medico,
+    '2026-06-17',
+    '10:00:00',
+    '14:00:00',
+    'DISPONIBLE'
+FROM medico m
+INNER JOIN usuario_sistema u ON u.id_usuario = m.id_usuario
+WHERE u.username = 'miguel.torres'
+ON DUPLICATE KEY UPDATE
+    estado = VALUES(estado);
+
 INSERT INTO usuario_sistema (
     username,
     password_hash,
