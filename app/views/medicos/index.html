@@ -1,35 +1,35 @@
 {% extends "layouts/app.html" %}
 {% import "partials/ui.html" as ui %}
 
-{% block title %}Gestión de Médicos | Gestión de Citas Médicas{% endblock %}
+{% block title %}Gestion de Medicos | Gestion de Citas Medicas{% endblock %}
 
 {% block content %}
-{{ ui.page_hero("Módulo administrativo", "Gestión de médicos", "Administrá el personal médico, sus especialidades y disponibilidad usando modelos preparados para persistencia real.", "Registrar médico", url_for("medicos.nuevo")) }}
+{{ ui.page_hero("Modulo administrativo", "Gestion de medicos", "Administra el personal medico, sus especialidades y disponibilidad usando modelos preparados para persistencia real.", "Registrar medico", url_for("medicos.nuevo")) }}
 
-<section class="grid gap-5 xl:grid-cols-[minmax(0,2fr)_minmax(280px,0.85fr)]">
+<section class="grid gap-5 2xl:grid-cols-[minmax(0,2fr)_minmax(280px,0.85fr)]">
     <article class="rounded-[1.5rem] border border-outline-variant/70 bg-white p-5 shadow-soft">
         <div class="mb-4 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div><p class="text-xs font-black uppercase tracking-[0.14em] text-secondary">Directorio</p><h3 class="mt-1 text-xl font-black tracking-tight text-primary">Médicos registrados</h3></div>
+            <div><p class="text-xs font-black uppercase tracking-[0.14em] text-secondary">Directorio</p><h3 class="mt-1 text-xl font-black tracking-tight text-primary">Medicos registrados</h3></div>
             <form action="{{ url_for('medicos.index') }}" method="get" class="relative">
-                <label class="sr-only" for="buscar-medico">Buscar médico</label>
+                <label class="sr-only" for="buscar-medico">Buscar medico</label>
                 <span class="material-symbols-rounded pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-outline" aria-hidden="true">search</span>
                 <input id="buscar-medico" name="q" type="search" placeholder="Buscar por nombre o especialidad" value="{{ busqueda }}" class="h-11 w-full rounded-full border border-outline-variant bg-white py-2 pl-10 pr-4 text-sm font-semibold outline-none transition focus:border-secondary-container focus:ring-4 focus:ring-blue-200/70 lg:w-80">
             </form>
         </div>
 
         <div class="overflow-x-auto">
-            <table class="min-w-full border-collapse text-left text-sm">
-                <thead><tr class="border-b border-outline-variant/70 text-xs font-black uppercase tracking-wider text-outline"><th class="px-3 py-3">Código</th><th class="px-3 py-3">Médico</th><th class="px-3 py-3">Especialidad</th><th class="px-3 py-3">Contacto</th><th class="px-3 py-3">Horario</th><th class="px-3 py-3">Estado</th><th class="px-3 py-3">Acciones</th></tr></thead>
+            <table class="min-w-[860px] border-collapse text-left text-sm">
+                <thead><tr class="border-b border-outline-variant/70 text-xs font-black uppercase tracking-wider text-outline"><th class="w-20 px-3 py-3">Codigo</th><th class="w-60 px-3 py-3">Medico</th><th class="w-36 px-3 py-3">Especialidad</th><th class="w-28 px-3 py-3">Contacto</th><th class="w-32 px-3 py-3">Horario</th><th class="w-24 px-3 py-3">Estado</th><th class="w-24 px-3 py-3 text-right">Acciones</th></tr></thead>
                 <tbody class="divide-y divide-outline-variant/60">
                     {% for medico in medicos %}
                         <tr class="transition hover:bg-blue-50/60">
                             <td class="px-3 py-4 font-bold text-primary">{{ medico.codigo }}</td>
-                            <td class="px-3 py-4"><strong class="block font-black text-slate-800">{{ medico.nombres }} {{ medico.apellidos }}</strong><small class="block text-sm font-semibold text-slate-500">{{ medico.email or medico.username }}</small></td>
-                            <td class="px-3 py-4">{{ medico.especialidad }}</td><td class="px-3 py-4">{{ medico.telefono or "Sin teléfono" }}</td><td class="px-3 py-4">{{ medico.horario }}</td><td class="px-3 py-4">{{ ui.status_badge(medico.estado) }}</td>
-                            <td class="px-3 py-4"><a class="font-black text-secondary hover:text-primary hover:underline" href="{{ url_for('medicos.editar', id_medico=medico.id_medico) }}">Editar</a></td>
+                            <td class="px-3 py-4"><strong class="block font-black text-slate-800">{{ medico.apellidos }}</strong><span class="block text-sm font-bold text-slate-700">{{ medico.nombres }}</span><small class="block break-all text-sm font-semibold text-slate-500">{{ medico.email or medico.username }}</small></td>
+                            <td class="px-3 py-4">{{ medico.especialidad }}</td><td class="px-3 py-4">{{ medico.telefono or "Sin telefono" }}</td><td class="px-3 py-4">{{ medico.horario }}</td><td class="px-3 py-4">{{ ui.status_badge(medico.estado) }}</td>
+                            <td class="px-3 py-4 text-right"><a class="inline-flex rounded-xl border border-outline-variant bg-white px-3 py-2 text-xs font-black text-secondary transition hover:border-secondary-container hover:bg-blue-50 hover:text-primary" href="{{ url_for('medicos.editar', id_medico=medico.id_medico) }}">Editar</a></td>
                         </tr>
                     {% else %}
-                        <tr><td class="px-3 py-6 text-center font-semibold text-slate-500" colspan="7">No hay médicos para mostrar.</td></tr>
+                        <tr><td class="px-3 py-6 text-center font-semibold text-slate-500" colspan="7">No hay medicos para mostrar.</td></tr>
                     {% endfor %}
                 </tbody>
             </table>
@@ -37,19 +37,19 @@
     </article>
 
     <aside class="rounded-[1.5rem] border border-outline-variant/70 bg-white p-5 shadow-soft">
-        <div class="mb-4"><p class="text-xs font-black uppercase tracking-[0.14em] text-secondary">Especialidades</p><h3 class="mt-1 text-xl font-black tracking-tight text-primary">Distribución actual</h3></div>
+        <div class="mb-4"><p class="text-xs font-black uppercase tracking-[0.14em] text-secondary">Especialidades</p><h3 class="mt-1 text-xl font-black tracking-tight text-primary">Distribucion actual</h3></div>
         <div class="grid gap-3">
             {% for especialidad in especialidades %}
-                <article class="flex items-center justify-between rounded-2xl border border-outline-variant/60 bg-blue-50/50 p-4"><span class="font-semibold text-slate-600">{{ especialidad.nombre }}</span><strong class="text-sm font-black text-primary">{{ especialidad.medicos }} médicos</strong></article>
+                <article class="flex items-center justify-between rounded-2xl border border-outline-variant/60 bg-blue-50/50 p-4"><span class="font-semibold text-slate-600">{{ especialidad.nombre }}</span><strong class="text-sm font-black text-primary">{{ especialidad.medicos }} medicos</strong></article>
             {% else %}<p class="text-sm font-semibold text-slate-500">No hay especialidades cargadas.</p>{% endfor %}
         </div>
         <div class="mt-5 border-t border-outline-variant/70 pt-5">
             <p class="text-xs font-black uppercase tracking-[0.14em] text-secondary">Nueva especialidad</p>
             <form action="{{ url_for('medicos.crear_especialidad') }}" method="post" class="mt-3 grid gap-3">
                 <label class="sr-only" for="nombre-especialidad">Nombre de especialidad</label>
-                <input id="nombre-especialidad" name="nombre" type="text" maxlength="100" placeholder="Ej. Dermatología" required class="rounded-2xl border border-outline-variant bg-white px-4 py-3 text-sm outline-none transition focus:border-secondary-container focus:ring-4 focus:ring-blue-200/70">
-                <label class="sr-only" for="descripcion-especialidad">Descripción</label>
-                <textarea id="descripcion-especialidad" name="descripcion" rows="2" maxlength="255" placeholder="Descripción breve" class="rounded-2xl border border-outline-variant bg-white px-4 py-3 text-sm outline-none transition focus:border-secondary-container focus:ring-4 focus:ring-blue-200/70"></textarea>
+                <input id="nombre-especialidad" name="nombre" type="text" maxlength="100" placeholder="Ej. Dermatologia" required class="rounded-2xl border border-outline-variant bg-white px-4 py-3 text-sm outline-none transition focus:border-secondary-container focus:ring-4 focus:ring-blue-200/70">
+                <label class="sr-only" for="descripcion-especialidad">Descripcion</label>
+                <textarea id="descripcion-especialidad" name="descripcion" rows="2" maxlength="255" placeholder="Descripcion breve" class="rounded-2xl border border-outline-variant bg-white px-4 py-3 text-sm outline-none transition focus:border-secondary-container focus:ring-4 focus:ring-blue-200/70"></textarea>
                 <button class="rounded-2xl bg-gradient-to-r from-primary to-secondary-container px-5 py-3 text-sm font-black text-white shadow-[0_14px_30px_rgba(0,88,190,0.2)]" type="submit">Agregar especialidad</button>
             </form>
         </div>

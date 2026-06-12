@@ -4,11 +4,6 @@ from config.database import get_cursor
 
 
 class UsuarioSistemaModel:
-    """Acceso a datos de usuarios del sistema.
-
-    Ojo con esto: el SQL vive acá, NO en controladores ni vistas. Esa separación
-    es la columna vertebral del MVC del proyecto.
-    """
 
     def buscar_por_username(self, username: str) -> dict[str, Any] | None:
         """Busca un usuario activo o inactivo por su nombre de usuario."""

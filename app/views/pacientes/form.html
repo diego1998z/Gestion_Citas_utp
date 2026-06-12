@@ -1,10 +1,10 @@
 {% extends "layouts/app.html" %}
 {% import "partials/ui.html" as ui %}
 
-{% block title %}{{ page_title }} | Gestión de Citas Médicas{% endblock %}
+{% block title %}{{ page_title }} | Gestion de Citas Medicas{% endblock %}
 
 {% block content %}
-{{ ui.page_hero(page_kicker, page_title, "Cargá datos consistentes del paciente. El controlador valida y PacienteModel persiste con consultas parametrizadas.", "Volver al listado", url_for("pacientes.index")) }}
+{{ ui.page_hero(page_kicker, page_title, "Carga datos consistentes del paciente. El controlador valida y PacienteModel persiste con consultas parametrizadas.", "Volver al listado", url_for("pacientes.index")) }}
 
 <section class="rounded-[1.5rem] border border-outline-variant/70 bg-white p-5 shadow-soft">
     <form action="{{ action_url }}" method="post" novalidate class="grid gap-5">
@@ -13,11 +13,11 @@
             <label class="grid gap-2" for="fecha_nacimiento"><span class="text-sm font-black text-slate-800">Fecha de nacimiento</span><input id="fecha_nacimiento" name="fecha_nacimiento" type="date" value="{{ form_data.fecha_nacimiento|default('', true) }}" class="rounded-2xl border border-outline-variant bg-white px-4 py-3 outline-none transition focus:border-secondary-container focus:ring-4 focus:ring-blue-200/70">{% if errors.fecha_nacimiento %}<small class="text-sm font-bold text-red-600">{{ errors.fecha_nacimiento }}</small>{% endif %}</label>
             <label class="grid gap-2" for="nombres"><span class="text-sm font-black text-slate-800">Nombres *</span><input id="nombres" name="nombres" type="text" maxlength="100" value="{{ form_data.nombres|default('', true) }}" required class="rounded-2xl border border-outline-variant bg-white px-4 py-3 outline-none transition focus:border-secondary-container focus:ring-4 focus:ring-blue-200/70">{% if errors.nombres %}<small class="text-sm font-bold text-red-600">{{ errors.nombres }}</small>{% endif %}</label>
             <label class="grid gap-2" for="apellidos"><span class="text-sm font-black text-slate-800">Apellidos *</span><input id="apellidos" name="apellidos" type="text" maxlength="100" value="{{ form_data.apellidos|default('', true) }}" required class="rounded-2xl border border-outline-variant bg-white px-4 py-3 outline-none transition focus:border-secondary-container focus:ring-4 focus:ring-blue-200/70">{% if errors.apellidos %}<small class="text-sm font-bold text-red-600">{{ errors.apellidos }}</small>{% endif %}</label>
-            <label class="grid gap-2" for="telefono"><span class="text-sm font-black text-slate-800">Teléfono</span><input id="telefono" name="telefono" type="text" maxlength="20" value="{{ form_data.telefono|default('', true) }}" class="rounded-2xl border border-outline-variant bg-white px-4 py-3 outline-none transition focus:border-secondary-container focus:ring-4 focus:ring-blue-200/70">{% if errors.telefono %}<small class="text-sm font-bold text-red-600">{{ errors.telefono }}</small>{% endif %}</label>
+            <label class="grid gap-2" for="telefono"><span class="text-sm font-black text-slate-800">Telefono</span><input id="telefono" name="telefono" type="text" maxlength="20" value="{{ form_data.telefono|default('', true) }}" class="rounded-2xl border border-outline-variant bg-white px-4 py-3 outline-none transition focus:border-secondary-container focus:ring-4 focus:ring-blue-200/70">{% if errors.telefono %}<small class="text-sm font-bold text-red-600">{{ errors.telefono }}</small>{% endif %}</label>
             <label class="grid gap-2" for="email"><span class="text-sm font-black text-slate-800">Correo</span><input id="email" name="email" type="email" maxlength="120" value="{{ form_data.email|default('', true) }}" class="rounded-2xl border border-outline-variant bg-white px-4 py-3 outline-none transition focus:border-secondary-container focus:ring-4 focus:ring-blue-200/70">{% if errors.email %}<small class="text-sm font-bold text-red-600">{{ errors.email }}</small>{% endif %}</label>
         </div>
 
-        <label class="grid gap-2" for="direccion"><span class="text-sm font-black text-slate-800">Dirección</span><textarea id="direccion" name="direccion" rows="3" maxlength="255" class="rounded-2xl border border-outline-variant bg-white px-4 py-3 outline-none transition focus:border-secondary-container focus:ring-4 focus:ring-blue-200/70">{{ form_data.direccion|default('', true) }}</textarea></label>
+        <label class="grid gap-2" for="direccion"><span class="text-sm font-black text-slate-800">Direccion</span><textarea id="direccion" name="direccion" rows="3" maxlength="255" class="rounded-2xl border border-outline-variant bg-white px-4 py-3 outline-none transition focus:border-secondary-container focus:ring-4 focus:ring-blue-200/70">{{ form_data.direccion|default('', true) }}</textarea></label>
 
         <div class="flex flex-col gap-3 sm:flex-row sm:justify-end">
             <a class="inline-flex items-center justify-center rounded-2xl border border-outline-variant bg-white px-5 py-3 text-sm font-black text-primary transition hover:border-secondary-container hover:bg-blue-50" href="{{ url_for('pacientes.index') }}">Cancelar</a>
