@@ -19,7 +19,7 @@
 
     <div class="overflow-x-auto">
         <table class="min-w-full border-collapse text-left text-sm">
-            <thead><tr class="border-b border-outline-variant/70 text-xs font-black uppercase tracking-wider text-outline"><th class="px-3 py-3">Código</th><th class="px-3 py-3">Fecha y hora</th><th class="px-3 py-3">Paciente</th><th class="px-3 py-3">Médico</th><th class="px-3 py-3">Especialidad</th><th class="px-3 py-3">Notificación</th><th class="px-3 py-3">Estado</th><th class="px-3 py-3">Acciones</th></tr></thead>
+            <thead><tr class="border-b border-outline-variant/70 text-xs font-black uppercase tracking-wider text-outline"><th class="px-3 py-3">Código</th><th class="px-3 py-3">Fecha y hora</th><th class="px-3 py-3">Paciente</th><th class="px-3 py-3">Médico</th><th class="px-3 py-3">Especialidad</th><th class="px-3 py-3">Notificación</th><th class="px-3 py-3">Estado</th><th class="px-3 py-3">Último evento</th><th class="px-3 py-3">Acciones</th></tr></thead>
             <tbody class="divide-y divide-outline-variant/60">
                 {% for cita in citas %}
                     {% set es_activa = cita.estado in ["PENDIENTE", "CONFIRMADA"] %}
@@ -30,6 +30,7 @@
                         <td class="px-3 py-4">{{ cita.medico }}</td><td class="px-3 py-4">{{ cita.especialidad }}</td>
                         <td class="px-3 py-4">{% if cita.notificado %}Sí{% if cita.fecha_notificacion %}<small class="block text-sm font-semibold text-slate-500">{{ cita.fecha_notificacion }}</small>{% endif %}{% else %}No{% endif %}</td>
                         <td class="px-3 py-4">{{ ui.status_badge(cita.estado) }}</td>
+                        <td class="px-3 py-4">{% if cita.ultimo_evento %}<span class="font-bold text-slate-700">{{ cita.ultimo_evento }}</span><small class="block text-sm font-semibold text-slate-500">{{ cita.fecha_ultimo_evento }}</small>{% else %}<span class="text-slate-400">—</span>{% endif %}</td>
                         <td class="px-3 py-4">
                             <div class="flex min-w-56 flex-wrap items-center gap-2">
                                 {% if current_user.rol in ["ADMINISTRADOR", "RECEPCIONISTA"] and es_activa %}
@@ -38,16 +39,21 @@
                                     <form action="{{ url_for('citas.cancelar', id_cita=cita.id_cita) }}" method="post" class="flex flex-wrap items-center gap-2"><label class="sr-only" for="motivo-cancelacion-{{ cita.id_cita }}">Motivo</label><input id="motivo-cancelacion-{{ cita.id_cita }}" name="motivo_cancelacion" type="text" placeholder="Motivo" required class="h-9 w-28 rounded-xl border border-outline-variant px-3 text-xs outline-none focus:border-secondary-container"><button class="rounded-xl bg-red-600 px-3 py-2 text-xs font-black text-white hover:bg-red-700" type="submit">Cancelar</button></form>
                                 {% endif %}
                                 {% if current_user.rol in ["ADMINISTRADOR", "MEDICO"] and es_activa %}
-                                    <a class="rounded-xl border border-outline-variant bg-white px-3 py-2 text-xs font-black text-primary hover:bg-blue-50" href="{{ url_for('historial.nuevo_desde_cita', id_cita=cita.id_cita) }}">Atender</a>
+                                    <a class="rounded-xl border border-outline-variant bg-white px-3 py-2 text-xs font-black text-primary hover:bg-blue-50" href="{{ url_for('historial.nuevo_desde_cita', id_cita=cita.id_cita) }}">Atender / Registrar observación</a>
+                                    {% if current_user.rol == "MEDICO" %}<a class="rounded-xl border border-outline-variant bg-white px-3 py-2 text-xs font-black text-primary hover:bg-blue-50" href="{{ url_for('citas.crear_seguimiento', id_cita=cita.id_cita) }}">Crear seguimiento</a>{% endif %}
                                     <form action="{{ url_for('citas.marcar_no_asistio', id_cita=cita.id_cita) }}" method="post"><button class="rounded-xl border border-outline-variant bg-white px-3 py-2 text-xs font-black text-primary hover:bg-blue-50" type="submit">No asistió</button></form>
-                                {% elif current_user.rol in ["ADMINISTRADOR", "MEDICO"] and cita.estado == "ATENDIDA" and not cita.tiene_historial %}
-                                    <a class="rounded-xl border border-outline-variant bg-white px-3 py-2 text-xs font-black text-primary hover:bg-blue-50" href="{{ url_for('historial.nuevo_desde_cita', id_cita=cita.id_cita) }}">Crear historial</a>
-                                {% endif %}
+                                 {% elif current_user.rol in ["ADMINISTRADOR", "MEDICO"] and cita.estado == "ATENDIDA" and cita.tiene_historial %}
+                                     <a class="rounded-xl border border-outline-variant bg-white px-3 py-2 text-xs font-black text-primary hover:bg-blue-50" href="{{ url_for('historial.editar_desde_cita', id_cita=cita.id_cita) }}">Editar observación</a>
+                                    {% if current_user.rol == "MEDICO" %}<a class="rounded-xl border border-outline-variant bg-white px-3 py-2 text-xs font-black text-primary hover:bg-blue-50" href="{{ url_for('citas.crear_seguimiento', id_cita=cita.id_cita) }}">Crear seguimiento</a>{% endif %}
+                                 {% elif current_user.rol in ["ADMINISTRADOR", "MEDICO"] and cita.estado == "ATENDIDA" and not cita.tiene_historial %}
+                                     <a class="rounded-xl border border-outline-variant bg-white px-3 py-2 text-xs font-black text-primary hover:bg-blue-50" href="{{ url_for('historial.nuevo_desde_cita', id_cita=cita.id_cita) }}">Crear historial</a>
+                                    {% if current_user.rol == "MEDICO" %}<a class="rounded-xl border border-outline-variant bg-white px-3 py-2 text-xs font-black text-primary hover:bg-blue-50" href="{{ url_for('citas.crear_seguimiento', id_cita=cita.id_cita) }}">Crear seguimiento</a>{% endif %}
+                                 {% endif %}
                             </div>
                         </td>
                     </tr>
                 {% else %}
-                    <tr><td class="px-3 py-6 text-center font-semibold text-slate-500" colspan="8">No hay citas registradas para mostrar.</td></tr>
+                    <tr><td class="px-3 py-6 text-center font-semibold text-slate-500" colspan="9">No hay citas registradas para mostrar.</td></tr>
                 {% endfor %}
             </tbody>
         </table>

@@ -27,7 +27,7 @@
                 Médicos
             </a>
         {% endif %}
-        <a class="{{ link_base }} {{ link_active if endpoint.startswith('citas.') else link_idle }}" href="{{ url_for('citas.index') if current_user and current_user.rol == 'MEDICO' else url_for('citas.programar') }}">
+        <a class="{{ link_base }} {{ link_active if endpoint.startswith('citas.') else link_idle }}" href="{{ url_for('citas.index') }}">
             <span class="material-symbols-rounded text-[1.35rem]" aria-hidden="true">calendar_month</span>
             Citas
         </a>

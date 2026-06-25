@@ -103,6 +103,40 @@ class HistorialCitaModel:
             )
             return cursor.fetchone()
 
+    def obtener_por_cita(self, id_cita: int) -> dict[str, Any] | None:
+        with get_cursor(dictionary=True) as (_, cursor):
+            cursor.execute(
+                """
+                SELECT
+                    id_historial_cita,
+                    id_cita,
+                    diagnostico,
+                    tratamiento,
+                    observaciones,
+                    fecha_atencion
+                FROM historial_cita
+                WHERE id_cita = %s
+                LIMIT 1
+                """,
+                (id_cita,),
+            )
+            return cursor.fetchone()
+
+    def actualizar_observacion(self, id_historial_cita: int, observacion: str) -> None:
+        with transaction(dictionary=True) as cursor:
+            cursor.execute(
+                """
+                UPDATE historial_cita
+                SET
+                    diagnostico = %s,
+                    observaciones = %s
+                WHERE id_historial_cita = %s
+                """,
+                (observacion, observacion, id_historial_cita),
+            )
+            if cursor.rowcount == 0:
+                raise ValueError("El historial no existe.")
+
     def crear_desde_cita(self, id_cita: int, observacion: str) -> int:
         """Crea historial solo si la cita ya está ATENDIDA."""
         with transaction(dictionary=True) as cursor:
@@ -114,7 +148,7 @@ class HistorialCitaModel:
 
             return self._insertar_historial(cursor, id_cita, observacion)
 
-    def atender_y_crear_desde_cita(self, id_cita: int, observacion: str) -> int:
+    def atender_y_crear_desde_cita(self, id_cita: int, observacion: str, id_usuario_actor: int | None = None) -> int:
         """Marca la cita como ATENDIDA y crea historial en una sola transacción MVP."""
         with transaction(dictionary=True) as cursor:
             cita = self._obtener_cita_bloqueada(cursor, id_cita)
@@ -135,6 +169,7 @@ class HistorialCitaModel:
                 """,
                 (id_cita,),
             )
+            self._registrar_evento(cursor, id_cita, "ATENDIDA", id_usuario_actor=id_usuario_actor)
             return self._insertar_historial(cursor, id_cita, observacion)
 
     def _obtener_cita_bloqueada(self, cursor: Any, id_cita: int) -> dict[str, Any] | None:
@@ -163,3 +198,22 @@ class HistorialCitaModel:
             (id_cita, observacion, observacion),
         )
         return int(cursor.lastrowid)
+
+    def _registrar_evento(
+        self,
+        cursor: Any,
+        id_cita: int,
+        tipo_evento: str,
+        id_usuario_actor: int | None = None,
+    ) -> None:
+        cursor.execute(
+            """
+            INSERT INTO cita_evento (
+                id_cita,
+                id_usuario_actor,
+                tipo_evento
+            )
+            VALUES (%s, %s, %s)
+            """,
+            (id_cita, id_usuario_actor, tipo_evento),
+        )

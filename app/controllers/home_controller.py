@@ -97,62 +97,53 @@ def _crear_dashboard_medico(usuario: dict) -> dict:
 
 
 def _crear_dashboard_general() -> dict:
+    try:
+        datos = cita_model.obtener_dashboard_operativo()
+    except MySQLError:
+        log_error_tecnico(logger, "Error cargando dashboard operativo")
+        flash("No pudimos cargar el resumen operativo desde la base de datos.", "error")
+        datos = {
+            "resumen_citas": {},
+            "total_pacientes": 0,
+            "disponibilidad": {},
+            "proximas_citas": [],
+            "actividad": [],
+            "medicos_sin_horario": 0,
+            "pacientes_contacto_incompleto": 0,
+        }
+
+    resumen_citas = datos.get("resumen_citas") or {}
+    disponibilidad = datos.get("disponibilidad") or {}
+
     resumen = [
         {
             "titulo": "Citas de hoy",
-            "valor": 24,
-            "detalle": "6 pendientes de confirmación",
+            "valor": resumen_citas.get("citas_hoy", 0),
+            "detalle": f"{resumen_citas.get('pendientes_hoy', 0)} pendientes hoy",
             "tono": "primary",
         },
         {
             "titulo": "Pacientes activos",
-            "valor": 184,
-            "detalle": "Datos temporales hasta conectar modelo",
+            "valor": datos.get("total_pacientes", 0),
+            "detalle": "Pacientes registrados en el sistema",
             "tono": "success",
         },
         {
             "titulo": "Médicos disponibles",
-            "valor": 12,
-            "detalle": "4 especialidades con atención",
+            "valor": disponibilidad.get("medicos_disponibles", 0),
+            "detalle": f"{disponibilidad.get('especialidades_disponibles', 0)} especialidades con horario vigente",
             "tono": "info",
         },
         {
             "titulo": "Citas canceladas",
-            "valor": 3,
-            "detalle": "Últimas 24 horas",
+            "valor": resumen_citas.get("canceladas_24h", 0),
+            "detalle": "Desde ayer hasta hoy",
             "tono": "warning",
         },
     ]
 
-    proximas_citas = [
-        {
-            "hora": "09:00",
-            "paciente": "María Gonzales",
-            "medico": "Dra. Ana Torres",
-            "especialidad": "Medicina General",
-            "estado": "CONFIRMADA",
-        },
-        {
-            "hora": "10:30",
-            "paciente": "Carlos Ramírez",
-            "medico": "Dr. Luis Mendoza",
-            "especialidad": "Cardiología",
-            "estado": "PENDIENTE",
-        },
-        {
-            "hora": "12:00",
-            "paciente": "Lucía Herrera",
-            "medico": "Dra. Sofía Rojas",
-            "especialidad": "Pediatría",
-            "estado": "CONFIRMADA",
-        },
-    ]
-
-    actividad_reciente = [
-        "Se registró una nueva cita para Medicina General.",
-        "Recepción confirmó una cita pendiente.",
-        "Historial actualizado para una atención finalizada.",
-    ]
+    proximas_citas = datos.get("proximas_citas") or []
+    actividad_reciente = [_formatear_actividad_general(evento) for evento in datos.get("actividad") or []]
 
     modulos_admin = [
         {
@@ -175,17 +166,13 @@ def _crear_dashboard_general() -> dict:
         },
     ]
 
-    alertas_admin = [
-        "2 médicos sin horario activo configurado.",
-        "5 pacientes requieren actualización de datos de contacto.",
-        "3 citas pendientes siguen sin notificación registrada.",
-    ]
+    alertas_admin = _crear_alertas_admin(datos)
 
     return {
-        "hero_description": "Vista operativa para monitorear citas, disponibilidad médica e historial de atención. Los datos actuales son temporales hasta conectar los modelos reales.",
+        "hero_description": "Vista operativa para monitorear citas, disponibilidad médica e historial de atención con datos registrados en el sistema.",
         "hero_action_label": "Nueva cita",
         "hero_action_url": url_for("citas.programar"),
-        "agenda_url": url_for("citas.programar"),
+        "agenda_url": url_for("citas.index"),
         "agenda_link_label": "Ver agenda",
         "resumen": resumen,
         "proximas_citas": proximas_citas,
@@ -193,6 +180,32 @@ def _crear_dashboard_general() -> dict:
         "modulos_admin": modulos_admin,
         "alertas_admin": alertas_admin,
     }
+
+
+def _formatear_actividad_general(evento: dict) -> str:
+    tipo = str(evento.get("tipo_evento") or "Evento").replace("_", " ").title()
+    paciente = evento.get("paciente") or "paciente registrado"
+    actor = evento.get("actor") or "Sistema"
+    return f"{tipo} para {paciente}. Registrado por {actor}."
+
+
+def _crear_alertas_admin(datos: dict) -> list[str]:
+    resumen_citas = datos.get("resumen_citas") or {}
+    alertas = []
+
+    medicos_sin_horario = int(datos.get("medicos_sin_horario") or 0)
+    if medicos_sin_horario:
+        alertas.append(f"{medicos_sin_horario} médico(s) activo(s) sin horario disponible vigente.")
+
+    pacientes_contacto_incompleto = int(datos.get("pacientes_contacto_incompleto") or 0)
+    if pacientes_contacto_incompleto:
+        alertas.append(f"{pacientes_contacto_incompleto} paciente(s) con datos de contacto incompletos.")
+
+    pendientes_notificacion = int(resumen_citas.get("pendientes_notificacion") or 0)
+    if pendientes_notificacion:
+        alertas.append(f"{pendientes_notificacion} cita(s) activa(s) sin notificación registrada.")
+
+    return alertas
 
 
 def _crear_actividad_medico(citas: list[dict], pacientes: list[dict]) -> list[str]:

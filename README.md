@@ -59,6 +59,12 @@ MYSQL_USER=root
 MYSQL_PASSWORD=
 MYSQL_DATABASE=gestion_citas_medicas
 LOG_LEVEL=INFO
+SMTP_HOST=
+SMTP_PORT=587
+SMTP_USER=
+SMTP_PASSWORD=
+SMTP_USE_TLS=true
+SMTP_FROM=
 ```
 
 ## Creación de base de datos
@@ -90,6 +96,22 @@ flask run
 
 No hay paso de build: el proyecto usa Flask con templates renderizados en servidor.
 
+## Despliegue en Railway
+
+Configurar estas variables en Railway antes de desplegar:
+
+- `SECRET_KEY`: obligatoria en producción.
+- `MYSQL_HOST`, `MYSQL_PORT`, `MYSQL_USER`, `MYSQL_PASSWORD`, `MYSQL_DATABASE`: conexión a la base MySQL ya creada por Railway.
+- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_USE_TLS`, `SMTP_FROM`: opcionales; si no se configuran, el sistema no enviará correos SMTP.
+
+Railway ejecuta el `Procfile`:
+
+```text
+web: python scripts/apply_database.py && gunicorn run:app --bind 0.0.0.0:$PORT
+```
+
+Antes de iniciar Gunicorn, `scripts/apply_database.py` aplica `database/schema.sql`, `database/migrations/20260625_appointment_workflow.sql` y `database/seed.sql` sobre la base configurada. El script omite `CREATE DATABASE` y `USE ...` porque en Railway la base ya existe y el usuario de la app puede no tener permisos para crear bases.
+
 ## Roles
 
 - `ADMINISTRADOR`: acceso a pacientes, médicos, especialidades, horarios, citas, historial y reportes.
@@ -101,8 +123,10 @@ No hay paso de build: el proyecto usa Flask con templates renderizados en servid
 - Validar disponibilidad del médico antes de programar una cita.
 - No permitir dos citas activas (`PENDIENTE` o `CONFIRMADA`) para el mismo médico, fecha y hora.
 - Cancelar una cita registra motivo y fecha de cancelación.
-- Notificar al paciente actualiza `notificado` y `fecha_notificacion`.
-- Reprogramar crea una nueva cita y marca la original como `REPROGRAMADA`.
+- Notificar al paciente envía correo SMTP; solo si el envío es exitoso actualiza `notificado` y `fecha_notificacion`. Si SMTP no está configurado o falla, registra evento de fallo y no marca la cita como notificada.
+- Reprogramar crea una nueva cita, marca la original como `REPROGRAMADA` y registra auditoría en `cita_evento`.
+- El médico puede crear citas de seguimiento para el mismo paciente y el mismo médico desde sus citas activas o atendidas.
+- Los recordatorios automáticos quedan disponibles como función de servicio (`send_pending_reminders`) y evitan duplicados usando `cita.notificado`.
 - El historial se genera desde una cita existente; `historial_cita` no duplica `id_paciente`.
 
 ## Documentación complementaria

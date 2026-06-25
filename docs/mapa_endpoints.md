@@ -21,8 +21,9 @@ Las rutas protegidas usan sesión Flask. Los roles se validan en controladores c
 | GET | `/citas` | `ADMINISTRADOR`, `RECEPCIONISTA`, `MEDICO` | `cita_controller.index` | Lista citas y acciones según rol. |
 | GET / POST | `/citas/programar` | `ADMINISTRADOR`, `RECEPCIONISTA` | `cita_controller.programar` | Programa una cita validando disponibilidad. |
 | POST | `/citas/<id_cita>/cancelar` | `ADMINISTRADOR`, `RECEPCIONISTA` | `cita_controller.cancelar` | Cancela cita con motivo. |
-| POST | `/citas/<id_cita>/notificar` | `ADMINISTRADOR`, `RECEPCIONISTA` | `cita_controller.notificar` | Marca cita como notificada. |
+| POST | `/citas/<id_cita>/notificar` | `ADMINISTRADOR`, `RECEPCIONISTA` | `cita_controller.notificar` | Envía correo y marca cita como notificada solo si el envío es exitoso. |
 | GET / POST | `/citas/<id_cita>/reprogramar` | `ADMINISTRADOR`, `RECEPCIONISTA` | `cita_controller.reprogramar` | Crea nueva cita y marca la original como reprogramada. |
+| GET / POST | `/citas/<id_cita>/seguimiento` | `MEDICO` | `cita_controller.crear_seguimiento` | Crea seguimiento del mismo paciente con el mismo médico. |
 | POST | `/citas/<id_cita>/atender` | `ADMINISTRADOR`, `MEDICO` | `cita_controller.atender` | Registra atención e historial desde cita. |
 | POST | `/citas/<id_cita>/no-asistio` | `ADMINISTRADOR`, `MEDICO` | `cita_controller.marcar_no_asistio` | Marca cita como no asistida. |
 | GET | `/historial` | `ADMINISTRADOR`, `MEDICO`, `RECEPCIONISTA` | `historial_controller.index` | Lista historiales de atención. |

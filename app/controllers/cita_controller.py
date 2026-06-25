@@ -1,3 +1,5 @@
+import smtplib
+
 from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
 from mysql.connector import Error as MySQLError
 
@@ -6,6 +8,7 @@ from app.models.historial_cita_model import HistorialCitaModel
 from app.models.horario_model import HorarioModel
 from app.models.medico_model import MedicoModel
 from app.models.paciente_model import PacienteModel
+from app.services.mail_service import MailConfigurationError, send_appointment_notification
 from app.utils.auth import get_current_user, roles_required
 from app.utils.logger import get_logger, log_error_tecnico
 from app.utils.validators import (
@@ -109,7 +112,7 @@ def cancelar(id_cita: int):
         return redirect(url_for("citas.index"))
 
     try:
-        cita_model.cancelar_cita(id_cita, form_data["motivo_cancelacion"])
+        cita_model.cancelar_cita(id_cita, form_data["motivo_cancelacion"], _obtener_id_usuario_actual())
     except ValueError as error:
         flash(str(error), "error")
     except MySQLError:
@@ -125,14 +128,34 @@ def cancelar(id_cita: int):
 @roles_required("ADMINISTRADOR", "RECEPCIONISTA")
 def notificar(id_cita: int):
     try:
-        cita_model.notificar_paciente(id_cita)
+        cita = cita_model.obtener_por_id(id_cita)
+        if not cita:
+            abort(404)
+        if not cita_model.es_notificable(cita):
+            flash("Solo se pueden notificar citas pendientes o confirmadas.", "error")
+            return redirect(url_for("citas.index"))
+        send_appointment_notification(cita)
+        cita_model.marcar_notificada(id_cita, _obtener_id_usuario_actual())
+    except MailConfigurationError as error:
+        try:
+            cita_model.registrar_notificacion_fallida(id_cita, str(error), _obtener_id_usuario_actual())
+        except MySQLError:
+            log_error_tecnico(logger, "Error registrando fallo de notificación")
+        flash(str(error), "error")
+    except (OSError, smtplib.SMTPException) as error:
+        log_error_tecnico(logger, "Error enviando correo de notificación")
+        try:
+            cita_model.registrar_notificacion_fallida(id_cita, "No se pudo enviar el correo SMTP.", _obtener_id_usuario_actual())
+        except MySQLError:
+            log_error_tecnico(logger, "Error registrando fallo de notificación")
+        flash("No pudimos enviar el correo al paciente. La cita no fue marcada como notificada.", "error")
     except ValueError as error:
         flash(str(error), "error")
     except MySQLError:
         log_error_tecnico(logger, "Error notificando cita")
-        flash("No pudimos marcar la notificación del paciente.", "error")
+        flash("No pudimos procesar la notificación del paciente.", "error")
     else:
-        flash("Paciente marcado como notificado.", "success")
+        flash("Correo enviado y paciente marcado como notificado.", "success")
 
     return redirect(url_for("citas.index"))
 
@@ -170,7 +193,7 @@ def reprogramar(id_cita: int):
             datos["id_recepcionista"] = _obtener_id_recepcionista_actual()
 
             try:
-                nueva_cita = cita_model.reprogramar_cita(id_cita, datos)
+                nueva_cita = cita_model.reprogramar_cita(id_cita, datos, _obtener_id_usuario_actual())
             except ValueError as error:
                 flash(str(error), "error")
             except MySQLError as error:
@@ -194,6 +217,63 @@ def reprogramar(id_cita: int):
     )
 
 
+@citas_bp.route("/citas/<int:id_cita>/seguimiento", methods=["GET", "POST"])
+@roles_required("MEDICO")
+def crear_seguimiento(id_cita: int):
+    id_medico = _obtener_id_medico_actual()
+    if not id_medico:
+        return redirect(url_for("citas.index"))
+
+    try:
+        cita = cita_model.obtener_por_id_y_medico(id_cita, id_medico)
+    except MySQLError:
+        log_error_tecnico(logger, "Error obteniendo cita para seguimiento")
+        flash("No pudimos cargar la cita solicitada.", "error")
+        return redirect(url_for("citas.index"))
+
+    if not cita:
+        abort(404)
+    if cita["estado"] not in {"PENDIENTE", "CONFIRMADA", "ATENDIDA"}:
+        flash("Solo podés crear seguimiento desde una cita activa o atendida.", "error")
+        return redirect(url_for("citas.index"))
+
+    errors: dict[str, str] = {}
+    form_data: dict = {
+        "id_medico": id_medico,
+        "fecha": request.args.get("fecha", ""),
+        "hora": request.args.get("hora", ""),
+        "motivo_consulta": request.args.get("motivo_consulta", "Seguimiento médico"),
+    }
+
+    if request.method == "POST":
+        form_data, errors = validar_reprogramacion_cita_form(request.form)
+        form_data["id_medico"] = id_medico
+
+        if not errors:
+            try:
+                nueva_cita = cita_model.crear_seguimiento(id_cita, form_data, _obtener_id_usuario_actual())
+            except ValueError as error:
+                flash(str(error), "error")
+            except MySQLError as error:
+                log_error_tecnico(logger, "Error creando seguimiento")
+                _flash_error_mysql(error, "No pudimos crear la cita de seguimiento. Intentá nuevamente.")
+            else:
+                flash("Cita de seguimiento creada correctamente.", "success")
+                return redirect(url_for("citas.index", id_cita=nueva_cita))
+
+    _, _, horarios_disponibles = _cargar_datos_programacion(id_medico)
+
+    return render_template(
+        "citas/seguimiento.html",
+        page_title="Crear seguimiento",
+        page_kicker="Agenda médica",
+        cita=cita,
+        horarios_disponibles=horarios_disponibles,
+        form_data=form_data,
+        errors=errors,
+    )
+
+
 @citas_bp.post("/citas/<int:id_cita>/atender")
 @roles_required("ADMINISTRADOR", "MEDICO")
 def atender(id_cita: int):
@@ -208,7 +288,7 @@ def atender(id_cita: int):
         return redirect(url_for("historial.nuevo_desde_cita", id_cita=id_cita))
 
     try:
-        historial_model.atender_y_crear_desde_cita(id_cita, str(form_data["observacion"]))
+        historial_model.atender_y_crear_desde_cita(id_cita, str(form_data["observacion"]), _obtener_id_usuario_actual())
     except ValueError as error:
         flash(str(error), "error")
     except MySQLError as error:
@@ -228,7 +308,7 @@ def marcar_no_asistio(id_cita: int):
         return redirect(url_for("citas.index"))
 
     try:
-        cita_model.marcar_no_asistio(id_cita)
+        cita_model.marcar_no_asistio(id_cita, _obtener_id_usuario_actual())
     except ValueError as error:
         flash(str(error), "error")
     except MySQLError:
@@ -292,8 +372,19 @@ def _obtener_id_recepcionista_actual() -> int | None:
 
     try:
         return cita_model.obtener_id_recepcionista_por_usuario(int(usuario["id_usuario"]))
-    except MySQLError:
+    except (MySQLError, KeyError, TypeError, ValueError):
         log_error_tecnico(logger, "Error obteniendo recepcionista actual")
+        return None
+
+
+def _obtener_id_usuario_actual() -> int | None:
+    usuario = get_current_user()
+    if not usuario:
+        return None
+
+    try:
+        return int(usuario["id_usuario"])
+    except (KeyError, TypeError, ValueError):
         return None
 
 
