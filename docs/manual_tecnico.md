@@ -37,8 +37,16 @@ Variables principales:
 | `MYSQL_DATABASE` | Base `gestion_citas_medicas`. | Sí |
 | `LOG_LEVEL` | Nivel de logging. | No |
 | `WTF_CSRF_TIME_LIMIT` | Vigencia del token CSRF en segundos. | No |
+| `SMTP_HOST` | Servidor SMTP. Por defecto `smtp.gmail.com`. | Sí, si se usan notificaciones |
+| `SMTP_PORT` | Puerto SMTP entero. Por defecto `587`. | Sí, si se usan notificaciones |
+| `SMTP_USE_TLS` | Activa STARTTLS (`true/false`, `1/0`, `yes/no`, `on/off`). Por defecto `true`. | Sí, si se usan notificaciones |
+| `SMTP_USER` | Usuario/correo autenticado del remitente. | Sí, si el SMTP autentica |
+| `SMTP_PASSWORD` | Password SMTP. En Gmail debe ser una App Password, no la contraseña normal. | Sí, si el SMTP autentica |
+| `SMTP_FROM` | Remitente visible. Si no se define, usa `SMTP_USER`. | Sí, si se usan notificaciones |
 
-Regla de seguridad: si `APP_ENV=production` o `FLASK_ENV=production`, la aplicación no debe arrancar sin `SECRET_KEY` explícita. En desarrollo se mantiene una clave temporal para facilitar ejecución local.
+Regla de seguridad: si `APP_ENV=production` o `FLASK_ENV=production`, la aplicación no debe arrancar sin `SECRET_KEY` explícita. En desarrollo se mantiene una clave temporal para facilitar ejecución local. La configuración se puede cargar desde `.env` y desde `config/.env`; `config/.env` tiene precedencia para permitir ajustes locales del proyecto sin tocar secretos reales.
+
+Para notificaciones por correo, el servicio usa SMTP. Con Gmail, crear una App Password en la cuenta de Google y colocarla en `SMTP_PASSWORD`; no usar ni versionar la contraseña normal de la cuenta.
 
 ## 4. Base de datos
 

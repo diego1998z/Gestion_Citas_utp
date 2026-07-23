@@ -96,9 +96,12 @@ La cita original queda como `REPROGRAMADA` y se crea una nueva cita pendiente.
 
 ### Notificar al paciente
 
+Antes de usar esta opción, el administrador técnico debe configurar SMTP en `config/.env`. Para Gmail se usa una App Password como contraseña SMTP, no la contraseña normal de la cuenta.
+
 1. Entrar a **Citas**.
 2. Buscar una cita no notificada.
 3. Presionar **Notificar**.
+4. Si el correo se envía correctamente, la cita queda marcada como notificada.
 
 ## 4. Médico
 

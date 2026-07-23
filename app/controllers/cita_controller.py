@@ -1,4 +1,5 @@
 import smtplib
+from datetime import datetime, timedelta
 
 from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
 from mysql.connector import Error as MySQLError
@@ -346,13 +347,16 @@ def _cargar_datos_programacion(id_medico: int | str | None = None) -> tuple[list
         medicos = medico_model.listar()
         id_medico_int = int(id_medico) if id_medico else None
         if id_medico_int:
-            horarios_disponibles = [
+            horarios_disponibles = _expandir_horarios_a_turnos([
                 _normalizar_horario(horario)
-                for horario in horario_model.listar_por_medico(id_medico_int)
-                if horario.get("estado") == "DISPONIBLE"
-            ]
+                for horario in horario_model.listar_por_medico(
+                    id_medico_int,
+                    solo_futuros=True,
+                    solo_disponibles=True,
+                )
+            ])
         else:
-            horarios_disponibles = [_normalizar_horario(horario) for horario in cita_model.listar_horarios_disponibles()]
+            horarios_disponibles = []
     except (MySQLError, ValueError):
         log_error_tecnico(logger, "Error cargando datos de programación")
         flash("No pudimos cargar pacientes, médicos u horarios disponibles.", "error")
@@ -362,9 +366,47 @@ def _cargar_datos_programacion(id_medico: int | str | None = None) -> tuple[list
 
 def _normalizar_horario(horario: dict) -> dict:
     horario_normalizado = dict(horario)
+    horario_normalizado["fecha_form"] = str(horario.get("fecha") or "")
     horario_normalizado["hora_inicio_form"] = horario.get("hora_inicio_form") or _hora_hhmm(horario.get("hora_inicio"))
     horario_normalizado["hora_fin_form"] = horario.get("hora_fin_form") or _hora_hhmm(horario.get("hora_fin"))
     return horario_normalizado
+
+
+def _expandir_horarios_a_turnos(horarios: list[dict]) -> list[dict]:
+    turnos: list[dict] = []
+
+    for horario in horarios:
+        fecha = horario.get("fecha_form") or str(horario.get("fecha") or "")
+        id_medico = horario.get("id_medico")
+
+        try:
+            inicio = datetime.strptime(horario["hora_inicio_form"], "%H:%M")
+            fin = datetime.strptime(horario["hora_fin_form"], "%H:%M")
+        except (KeyError, TypeError, ValueError):
+            continue
+
+        actual = inicio
+        while actual < fin:
+            hora_inicio = actual.strftime("%H:%M")
+            siguiente = min(actual + timedelta(minutes=30), fin)
+
+            if id_medico and cita_model.validar_disponibilidad_medico(int(id_medico), fecha, hora_inicio):
+                turno = dict(horario)
+                turno["hora_inicio_form"] = hora_inicio
+                turno["hora_fin_form"] = siguiente.strftime("%H:%M")
+                turno["es_turno"] = True
+                turnos.append(turno)
+
+            actual = siguiente
+
+    return sorted(
+        turnos,
+        key=lambda turno: (
+            str(turno.get("fecha_form") or ""),
+            str(turno.get("hora_inicio_form") or ""),
+            str(turno.get("medico") or ""),
+        ),
+    )
 
 
 def _hora_hhmm(valor: object) -> str:

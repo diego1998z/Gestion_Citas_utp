@@ -38,8 +38,9 @@ def index():
         page_title="Historial de Citas",
         page_kicker="Registro de atenciones",
         historiales=historiales,
-        indicadores=_crear_indicadores(historiales),
+        indicadores=_crear_indicadores(historiales, usuario.get("rol") if usuario else None),
         busqueda=busqueda,
+        rol_actual=usuario.get("rol") if usuario else None,
     )
 
 
@@ -178,11 +179,21 @@ def editar_desde_cita(id_cita: int):
     )
 
 
-def _crear_indicadores(historiales: list[dict]) -> list[dict]:
+def _crear_indicadores(historiales: list[dict], rol: str | None = None) -> list[dict]:
     total = len(historiales)
-    medicos = {historial.get("medico") for historial in historiales if historial.get("medico")}
+    pacientes = {historial.get("paciente_dni") for historial in historiales if historial.get("paciente_dni")}
     especialidades = {historial.get("especialidad") for historial in historiales if historial.get("especialidad")}
 
+    if rol == "MEDICO":
+        fechas = [str(historial.get("fecha_atencion")) for historial in historiales if historial.get("fecha_atencion")]
+        ultima_atencion = max(fechas) if fechas else "Sin registros"
+        return [
+            {"titulo": "Atenciones realizadas", "valor": total, "detalle": "Según filtro actual", "tono": "primary"},
+            {"titulo": "Pacientes atendidos", "valor": len(pacientes), "detalle": "Pacientes únicos", "tono": "success"},
+            {"titulo": "Última atención", "valor": ultima_atencion, "detalle": "Registro más reciente", "tono": "info"},
+        ]
+
+    medicos = {historial.get("medico") for historial in historiales if historial.get("medico")}
     return [
         {"titulo": "Atenciones registradas", "valor": total, "detalle": "Según filtro actual", "tono": "primary"},
         {"titulo": "Médicos", "valor": len(medicos), "detalle": "Con atenciones registradas", "tono": "success"},

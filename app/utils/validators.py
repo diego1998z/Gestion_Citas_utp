@@ -88,6 +88,15 @@ def _validar_hora(hora: str | None, campo: str, errores: dict[str, str]) -> str 
     return hora
 
 
+def _extraer_horario_seleccionado(form: MultiDict) -> tuple[str | None, str | None]:
+    horario_seleccionado = _normalizar_opcional(form.get("horario_seleccionado"))
+    if not horario_seleccionado or "|" not in horario_seleccionado:
+        return None, None
+
+    fecha, hora = horario_seleccionado.split("|", 1)
+    return _normalizar_opcional(fecha), _normalizar_opcional(hora)
+
+
 def validar_paciente_form(form: MultiDict) -> tuple[dict[str, str | None], dict[str, str]]:
     datos: dict[str, str | None] = {
         "dni": _normalizar_texto(form.get("dni")),
@@ -255,11 +264,12 @@ def _validar_entero_positivo(valor: str | None, campo: str, errores: dict[str, s
 
 
 def validar_programacion_cita_form(form: MultiDict) -> tuple[dict[str, str | int | None], dict[str, str]]:
+    fecha_horario, hora_horario = _extraer_horario_seleccionado(form)
     datos: dict[str, str | int | None] = {
         "id_paciente": None,
         "id_medico": None,
-        "fecha": _normalizar_opcional(form.get("fecha")),
-        "hora": _normalizar_opcional(form.get("hora")),
+        "fecha": _normalizar_opcional(form.get("fecha")) or fecha_horario,
+        "hora": _normalizar_opcional(form.get("hora")) or hora_horario,
         "motivo_consulta": _normalizar_opcional(form.get("motivo_consulta")),
     }
     errores: dict[str, str] = {}
@@ -291,10 +301,11 @@ def validar_programacion_cita_form(form: MultiDict) -> tuple[dict[str, str | int
 
 
 def validar_reprogramacion_cita_form(form: MultiDict) -> tuple[dict[str, str | int | None], dict[str, str]]:
+    fecha_horario, hora_horario = _extraer_horario_seleccionado(form)
     datos: dict[str, str | int | None] = {
         "id_medico": None,
-        "fecha": _normalizar_opcional(form.get("fecha")),
-        "hora": _normalizar_opcional(form.get("hora")),
+        "fecha": _normalizar_opcional(form.get("fecha")) or fecha_horario,
+        "hora": _normalizar_opcional(form.get("hora")) or hora_horario,
         "motivo_consulta": _normalizar_opcional(form.get("motivo_consulta")),
     }
     errores: dict[str, str] = {}

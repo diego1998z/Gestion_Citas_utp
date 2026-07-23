@@ -90,12 +90,17 @@ class PacienteModel:
                 """
                 SELECT
                     id_paciente,
+                    CONCAT('PAC-', LPAD(id_paciente, 3, '0')) AS codigo,
                     dni,
                     nombres,
                     apellidos,
                     telefono,
                     email,
                     fecha_nacimiento,
+                    CASE
+                        WHEN fecha_nacimiento IS NULL THEN NULL
+                        ELSE TIMESTAMPDIFF(YEAR, fecha_nacimiento, CURDATE())
+                    END AS edad,
                     direccion
                 FROM paciente
                 WHERE id_paciente = %s
@@ -104,6 +109,20 @@ class PacienteModel:
                 (id_paciente,),
             )
             return cursor.fetchone()
+
+    def tiene_cita_con_medico(self, id_paciente: int, id_medico: int) -> bool:
+        with get_cursor(dictionary=True) as (_, cursor):
+            cursor.execute(
+                """
+                SELECT 1
+                FROM cita
+                WHERE id_paciente = %s
+                  AND id_medico = %s
+                LIMIT 1
+                """,
+                (id_paciente, id_medico),
+            )
+            return cursor.fetchone() is not None
 
     def crear(self, datos: dict[str, Any]) -> int:
         with transaction(dictionary=True) as cursor:

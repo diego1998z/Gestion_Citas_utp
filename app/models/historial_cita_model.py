@@ -12,13 +12,25 @@ class HistorialCitaModel:
     def listar_por_medico(self, id_medico: int, busqueda: str | None = None) -> list[dict[str, Any]]:
         return self._listar_con_filtros(busqueda=busqueda, id_medico=id_medico)
 
-    def _listar_con_filtros(self, busqueda: str | None = None, id_medico: int | None = None) -> list[dict[str, Any]]:
+    def listar_por_paciente(self, id_paciente: int, busqueda: str | None = None) -> list[dict[str, Any]]:
+        return self._listar_con_filtros(busqueda=busqueda, id_paciente=id_paciente)
+
+    def _listar_con_filtros(
+        self,
+        busqueda: str | None = None,
+        id_medico: int | None = None,
+        id_paciente: int | None = None,
+    ) -> list[dict[str, Any]]:
         filtros: list[str] = []
         parametros: list[Any] = []
 
         if id_medico is not None:
             filtros.append("c.id_medico = %s")
             parametros.append(id_medico)
+
+        if id_paciente is not None:
+            filtros.append("c.id_paciente = %s")
+            parametros.append(id_paciente)
 
         if busqueda:
             termino = f"%{busqueda.strip()}%"
@@ -51,6 +63,7 @@ class HistorialCitaModel:
                     hc.tratamiento,
                     hc.observaciones,
                     hc.fecha_atencion,
+                    c.id_paciente,
                     c.fecha AS fecha_cita,
                     c.hora AS hora_cita,
                     c.estado AS estado_cita,

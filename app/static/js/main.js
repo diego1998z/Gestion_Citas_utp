@@ -30,6 +30,69 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    document.querySelectorAll("[data-appointment-slot]").forEach((select) => {
+        const form = select.closest("form");
+        const fechaSelect = form?.querySelector("[data-appointment-date-select]");
+        const fechaInput = form?.querySelector("[data-appointment-date]");
+        const horaInput = form?.querySelector("[data-appointment-time]");
+        const placeholderOption = select.querySelector("option[value='']");
+        const timeOptions = Array.from(select.options).filter((option) => option.value);
+
+        const filterTimeOptions = () => {
+            const selectedDate = fechaSelect?.value || "";
+            let visibleOptions = 0;
+
+            timeOptions.forEach((option) => {
+                const sameDate = option.dataset.fecha === selectedDate;
+                option.hidden = !sameDate;
+                option.disabled = !sameDate;
+
+                if (sameDate) {
+                    visibleOptions += 1;
+                }
+            });
+
+            if (placeholderOption) {
+                placeholderOption.textContent = selectedDate
+                    ? "Seleccionar hora"
+                    : "Primero seleccioná una fecha";
+            }
+
+            if (!selectedDate || select.selectedOptions[0]?.dataset.fecha !== selectedDate) {
+                select.value = "";
+            }
+
+            select.disabled = !selectedDate || visibleOptions === 0;
+        };
+
+        const syncAppointmentSlot = () => {
+            const selectedOption = select.options[select.selectedIndex];
+
+            if (!selectedOption || !selectedOption.value) {
+                if (fechaInput) fechaInput.value = "";
+                if (horaInput) horaInput.value = "";
+                return;
+            }
+
+            if (fechaInput) {
+                fechaInput.value = selectedOption.dataset.fecha || "";
+            }
+
+            if (horaInput) {
+                horaInput.value = selectedOption.dataset.hora || "";
+            }
+        };
+
+        fechaSelect?.addEventListener("change", () => {
+            filterTimeOptions();
+            syncAppointmentSlot();
+        });
+
+        select.addEventListener("change", syncAppointmentSlot);
+        filterTimeOptions();
+        syncAppointmentSlot();
+    });
+
     document.querySelectorAll("[data-password-toggle]").forEach((button) => {
         button.addEventListener("click", () => {
             const inputId = button.getAttribute("aria-controls");

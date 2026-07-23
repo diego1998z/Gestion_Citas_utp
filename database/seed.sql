@@ -1,5 +1,27 @@
 USE gestion_citas_medicas;
 
+-- Normaliza credenciales demo antiguas a usernames ligados a nombres reales.
+UPDATE usuario_sistema
+SET username = 'patricia.salas'
+WHERE username = 'admin'
+  AND NOT EXISTS (
+      SELECT 1 FROM (SELECT id_usuario FROM usuario_sistema WHERE username = 'patricia.salas') AS usuario_existente
+  );
+
+UPDATE usuario_sistema
+SET username = 'luis.quispe'
+WHERE username = 'medico'
+  AND NOT EXISTS (
+      SELECT 1 FROM (SELECT id_usuario FROM usuario_sistema WHERE username = 'luis.quispe') AS usuario_existente
+  );
+
+UPDATE usuario_sistema
+SET username = 'valeria.nunez'
+WHERE username = 'recepcionista'
+  AND NOT EXISTS (
+      SELECT 1 FROM (SELECT id_usuario FROM usuario_sistema WHERE username = 'valeria.nunez') AS usuario_existente
+  );
+
 INSERT INTO usuario_sistema (
     username,
     password_hash,
@@ -10,8 +32,8 @@ INSERT INTO usuario_sistema (
     email
 )
 VALUES (
-    'admin',
-    'pbkdf2:sha256:1000000$demo_admin_salt$e62919f43637326188dc4db52aece55e55d4c5d812ad7684a85e99d7bdbcf8fd',
+    'patricia.salas',
+    'scrypt:32768:8:1$3ork0VoP8SuJcgCd$2c24d013d218ae3d16f09a6f69e062ded54555760b1f2498d583a232a36ee0002a1262821d99eaa6bf6771034beec134e5447849f266e72be8fa92528abd57e6',
     'ADMINISTRADOR',
     'ACTIVO',
     'Patricia Elena',
@@ -19,6 +41,7 @@ VALUES (
     'patricia.salas@demo-clinic.test'
 )
 ON DUPLICATE KEY UPDATE
+    username = VALUES(username),
     password_hash = VALUES(password_hash),
     rol = VALUES(rol),
     estado = VALUES(estado),
@@ -29,7 +52,42 @@ ON DUPLICATE KEY UPDATE
 INSERT INTO administrador (id_usuario)
 SELECT id_usuario
 FROM usuario_sistema
-WHERE username = 'admin'
+WHERE username = 'patricia.salas'
+ON DUPLICATE KEY UPDATE
+    id_usuario = VALUES(id_usuario);
+
+
+INSERT INTO usuario_sistema (
+    username,
+    password_hash,
+    rol,
+    estado,
+    nombres,
+    apellidos,
+    email
+)
+VALUES (
+    'roberto.rivas',
+    'scrypt:32768:8:1$pTsfkT01uksDxYL0$adc7f483b84280ad7ee6e05f2aa770bf7ee6b13f805e55f540e16f1beebbc5dbe44333ec8e1490d90fc6be04b27cbf584d91e9e29ebb8b5156551654fa681c60',
+    'ADMINISTRADOR',
+    'ACTIVO',
+    'Roberto Carlos',
+    'Rivas Alarcon',
+    'roberto.rivas.alarcon@demo-clinic.test'
+)
+ON DUPLICATE KEY UPDATE
+    username = VALUES(username),
+    password_hash = VALUES(password_hash),
+    rol = VALUES(rol),
+    estado = VALUES(estado),
+    nombres = VALUES(nombres),
+    apellidos = VALUES(apellidos),
+    email = VALUES(email);
+
+INSERT INTO administrador (id_usuario)
+SELECT id_usuario
+FROM usuario_sistema
+WHERE username = 'roberto.rivas'
 ON DUPLICATE KEY UPDATE
     id_usuario = VALUES(id_usuario);
 
@@ -54,8 +112,8 @@ INSERT INTO usuario_sistema (
     email
 )
 VALUES (
-    'medico',
-    'pbkdf2:sha256:1000000$demo_medico_salt$66f30174d0d6605ff86c30e50dec01f5d00a43a0a119e59be4fe56ddf2b8181d',
+    'luis.quispe',
+    'scrypt:32768:8:1$HhB91TUBcidImQJk$d37f9e3e5e828e41202dab4f1844037eb0ffc1b43545320bd121e890d33fae7305c3e50012090968ad9c387a0f578aeac17c8cefc8524e7ccbefb4ba817e308a',
     'MEDICO',
     'ACTIVO',
     'Luis Alberto',
@@ -63,6 +121,7 @@ VALUES (
     'luis.quispe.mamani@demo-clinic.test'
 )
 ON DUPLICATE KEY UPDATE
+    username = VALUES(username),
     password_hash = VALUES(password_hash),
     rol = VALUES(rol),
     estado = VALUES(estado),
@@ -78,7 +137,7 @@ SELECT
 FROM usuario_sistema
 INNER JOIN especialidad
     ON especialidad.nombre = 'Medicina General'
-WHERE usuario_sistema.username = 'medico'
+WHERE usuario_sistema.username = 'luis.quispe'
 ON DUPLICATE KEY UPDATE
     id_especialidad = VALUES(id_especialidad),
     numero_colegiatura = VALUES(numero_colegiatura);
@@ -95,7 +154,7 @@ INSERT INTO usuario_sistema (
 VALUES
     (
         'ana.huaman',
-        'pbkdf2:sha256:1000000$demo_medico_salt$66f30174d0d6605ff86c30e50dec01f5d00a43a0a119e59be4fe56ddf2b8181d',
+        'scrypt:32768:8:1$AMAhewNOASpQWg9L$ff75ec52451092d4e43b8347e14e39e7a9d4fdc4800efcc5b48814c57eb8130ca827fdd0e8274972addeb13be57df843d965334daf17b547ab9891c9043db98e',
         'MEDICO',
         'ACTIVO',
         'Ana Lucia',
@@ -104,7 +163,7 @@ VALUES
     ),
     (
         'carlos.choque',
-        'pbkdf2:sha256:1000000$demo_medico_salt$66f30174d0d6605ff86c30e50dec01f5d00a43a0a119e59be4fe56ddf2b8181d',
+        'scrypt:32768:8:1$CoVMOEqBukfalZnx$ed36959b0caebcf556093d69283453ca65613173ce9cfdd3afed441a7f9596cbb3205bdbc1938c68ef4ebd6b8f1f44daf60c397f797a02f246dd0f78a005468f',
         'MEDICO',
         'ACTIVO',
         'Carlos Enrique',
@@ -113,7 +172,7 @@ VALUES
     ),
     (
         'rosa.condori',
-        'pbkdf2:sha256:1000000$demo_medico_salt$66f30174d0d6605ff86c30e50dec01f5d00a43a0a119e59be4fe56ddf2b8181d',
+        'scrypt:32768:8:1$zFj6kcqtivv7bQVt$dec361fa1863f25fb89250887714981a7fe5fa72ab0236996fed2845d6159c3e5214966d48b77bb1ea4a7bacefd358513cac4820617ef9f94dc7a2a7b957ceb8',
         'MEDICO',
         'ACTIVO',
         'Rosa Maria',
@@ -122,7 +181,7 @@ VALUES
     ),
     (
         'miguel.torres',
-        'pbkdf2:sha256:1000000$demo_medico_salt$66f30174d0d6605ff86c30e50dec01f5d00a43a0a119e59be4fe56ddf2b8181d',
+        'scrypt:32768:8:1$noY5irxJZeg3G4s1$7a0e7f29bc146c8118cacd2ee5591c42ba1fda825ce15820a4547bc9b4874f01ddedb70958ddd5dc84bf663974fa9c85dbf6716a2730a63e26a9bf2ccd910228',
         'MEDICO',
         'ACTIVO',
         'Miguel Angel',
@@ -130,6 +189,7 @@ VALUES
         'miguel.torres.paredes@demo-clinic.test'
     )
 ON DUPLICATE KEY UPDATE
+    username = VALUES(username),
     password_hash = VALUES(password_hash),
     rol = VALUES(rol),
     estado = VALUES(estado),
@@ -204,7 +264,7 @@ SELECT
     'DISPONIBLE'
 FROM medico m
 INNER JOIN usuario_sistema u ON u.id_usuario = m.id_usuario
-WHERE u.username = 'medico'
+WHERE u.username = 'luis.quispe'
 ON DUPLICATE KEY UPDATE
     estado = VALUES(estado);
 
@@ -294,8 +354,8 @@ INSERT INTO usuario_sistema (
     email
 )
 VALUES (
-    'recepcionista',
-    'pbkdf2:sha256:1000000$demo_recepcionista_salt$6d63b5f227a6116d83e5bc07036db00acd34ba908301e77c164a316822218d38',
+    'valeria.nunez',
+    'scrypt:32768:8:1$N1OdXzA27beLKbFc$2dcc49fb3c32fba4cbc2a58c417295fe1885782180aa779b5cfd00ae31931f76a1f5505917ca5a03fc1f92c4d59506fdadcaf35293be57a9ef7259154e674838',
     'RECEPCIONISTA',
     'ACTIVO',
     'Valeria Milagros',
@@ -303,6 +363,7 @@ VALUES (
     'valeria.nunez@demo-clinic.test'
 )
 ON DUPLICATE KEY UPDATE
+    username = VALUES(username),
     password_hash = VALUES(password_hash),
     rol = VALUES(rol),
     estado = VALUES(estado),
@@ -315,7 +376,44 @@ SELECT
     id_usuario,
     'REC-DEMO-001'
 FROM usuario_sistema
-WHERE username = 'recepcionista'
+WHERE username = 'valeria.nunez'
+ON DUPLICATE KEY UPDATE
+    codigo_empleado = VALUES(codigo_empleado);
+
+
+INSERT INTO usuario_sistema (
+    username,
+    password_hash,
+    rol,
+    estado,
+    nombres,
+    apellidos,
+    email
+)
+VALUES (
+    'marisol.castro',
+    'scrypt:32768:8:1$Wa3pYGbY6ptMgMZz$b077fca327c29d53cf104b3ada25ebbc9ba9da8c899741597f722dec5cff314619133213eeaf01d5742b4db96547dd1e2104ad189b42523e7f63e3dc4be9c4f1',
+    'RECEPCIONISTA',
+    'ACTIVO',
+    'Marisol Andrea',
+    'Castro Benavides',
+    'marisol.castro.benavides@demo-clinic.test'
+)
+ON DUPLICATE KEY UPDATE
+    username = VALUES(username),
+    password_hash = VALUES(password_hash),
+    rol = VALUES(rol),
+    estado = VALUES(estado),
+    nombres = VALUES(nombres),
+    apellidos = VALUES(apellidos),
+    email = VALUES(email);
+
+INSERT INTO recepcionista (id_usuario, codigo_empleado)
+SELECT
+    id_usuario,
+    'REC-DEMO-002'
+FROM usuario_sistema
+WHERE username = 'marisol.castro'
 ON DUPLICATE KEY UPDATE
     codigo_empleado = VALUES(codigo_empleado);
 
@@ -331,55 +429,55 @@ INSERT INTO paciente (
 VALUES
     (
         '90000001',
-        'Maria Elena',
-        'Vargas Huaman',
+        'Sofia Camila',
+        'Llanos Paredes',
         '900000001',
-        'maria.vargas.huaman@example.test',
+        'sofia.llanos.paredes@example.test',
         '1990-04-12',
         'Av. Tupac Amaru 1245, Comas'
     ),
     (
         '90000002',
-        'Jose Antonio',
-        'Ramos Quispe',
+        'Mateo Alejandro',
+        'Vega Cardenas',
         '900000002',
-        'jose.ramos.quispe@example.test',
+        'mateo.vega.cardenas@example.test',
         '1985-09-23',
         'Jr. Los Pinos 342, Comas'
     ),
     (
         '90000003',
-        'Carmen Rosa',
-        'Mamani Flores',
+        'Valentina Isabel',
+        'Ortega Molina',
         '900000003',
-        'carmen.mamani.flores@example.test',
+        'valentina.ortega.molina@example.test',
         '1978-01-30',
         'Av. Universitaria 875, Los Olivos'
     ),
     (
         '90000004',
-        'Diego Alonso',
-        'Salazar Torres',
+        'Sebastian Nicolas',
+        'Campos Aguilar',
         '900000004',
-        'diego.salazar.torres@example.test',
+        'sebastian.campos.aguilar@example.test',
         '2001-07-18',
         'Calle Las Gardenias 210, Carabayllo'
     ),
     (
         '90000005',
-        'Lucia Fernanda',
-        'Condori Rojas',
+        'Renata Milagros',
+        'Soto Cabrera',
         '900000005',
-        'lucia.condori.rojas@example.test',
+        'renata.soto.cabrera@example.test',
         '1996-11-05',
         'Pasaje San Martin 456, Comas'
     ),
     (
         '90000006',
-        'Juan Carlos',
-        'Paredes Choque',
+        'Gabriel Esteban',
+        'Rojas Palomino',
         '900000006',
-        'juan.paredes.choque@example.test',
+        'gabriel.rojas.palomino@example.test',
         '1969-03-14',
         'Av. Mexico 781, Independencia'
     )
@@ -390,6 +488,51 @@ ON DUPLICATE KEY UPDATE
     email = VALUES(email),
     fecha_nacimiento = VALUES(fecha_nacimiento),
     direccion = VALUES(direccion);
+
+
+
+-- Horarios demo inmediatos para pruebas del 2026-07-23 al 2026-07-28.
+INSERT INTO horario (id_medico, fecha, hora_inicio, hora_fin, estado)
+SELECT m.id_medico, d.fecha, d.hora_inicio, d.hora_fin, 'DISPONIBLE'
+FROM medico m
+INNER JOIN usuario_sistema u ON u.id_usuario = m.id_usuario
+INNER JOIN (
+    SELECT DATE '2026-07-23' AS fecha, TIME '08:00:00' AS hora_inicio, TIME '12:00:00' AS hora_fin
+    UNION ALL SELECT DATE '2026-07-24', TIME '08:00:00', TIME '12:00:00'
+    UNION ALL SELECT DATE '2026-07-25', TIME '08:00:00', TIME '12:00:00'
+    UNION ALL SELECT DATE '2026-07-26', TIME '08:00:00', TIME '12:00:00'
+    UNION ALL SELECT DATE '2026-07-27', TIME '08:00:00', TIME '12:00:00'
+    UNION ALL SELECT DATE '2026-07-28', TIME '08:00:00', TIME '12:00:00'
+) d
+WHERE u.username IN ('luis.quispe', 'ana.huaman', 'carlos.choque', 'rosa.condori', 'miguel.torres', 'elena.villanueva')
+ON DUPLICATE KEY UPDATE estado = VALUES(estado);
+
+-- Horarios demo futuros julio/agosto 2026 para programación desde 2026-07-23.
+INSERT INTO horario (id_medico, fecha, hora_inicio, hora_fin, estado)
+SELECT m.id_medico, h.fecha, h.hora_inicio, h.hora_fin, h.estado
+FROM medico m
+INNER JOIN usuario_sistema u ON u.id_usuario = m.id_usuario
+INNER JOIN (
+    SELECT 'luis.quispe' AS username, DATE '2026-07-24' AS fecha, TIME '08:00:00' AS hora_inicio, TIME '12:00:00' AS hora_fin, 'DISPONIBLE' AS estado
+    UNION ALL SELECT 'luis.quispe', DATE '2026-08-03', TIME '14:00:00', TIME '18:00:00', 'DISPONIBLE'
+    UNION ALL SELECT 'luis.quispe', DATE '2026-08-17', TIME '08:00:00', TIME '12:00:00', 'NO_DISPONIBLE'
+    UNION ALL SELECT 'ana.huaman', DATE '2026-07-27', TIME '09:00:00', TIME '12:00:00', 'DISPONIBLE'
+    UNION ALL SELECT 'ana.huaman', DATE '2026-08-05', TIME '14:00:00', TIME '18:00:00', 'DISPONIBLE'
+    UNION ALL SELECT 'ana.huaman', DATE '2026-08-19', TIME '08:00:00', TIME '12:00:00', 'DISPONIBLE'
+    UNION ALL SELECT 'carlos.choque', DATE '2026-07-28', TIME '08:00:00', TIME '12:00:00', 'DISPONIBLE'
+    UNION ALL SELECT 'carlos.choque', DATE '2026-08-06', TIME '14:00:00', TIME '18:00:00', 'NO_DISPONIBLE'
+    UNION ALL SELECT 'carlos.choque', DATE '2026-08-20', TIME '08:00:00', TIME '12:00:00', 'DISPONIBLE'
+    UNION ALL SELECT 'rosa.condori', DATE '2026-07-29', TIME '14:00:00', TIME '18:00:00', 'DISPONIBLE'
+    UNION ALL SELECT 'rosa.condori', DATE '2026-08-10', TIME '08:00:00', TIME '12:00:00', 'DISPONIBLE'
+    UNION ALL SELECT 'rosa.condori', DATE '2026-08-24', TIME '14:00:00', TIME '18:00:00', 'DISPONIBLE'
+    UNION ALL SELECT 'miguel.torres', DATE '2026-07-30', TIME '08:00:00', TIME '12:00:00', 'DISPONIBLE'
+    UNION ALL SELECT 'miguel.torres', DATE '2026-08-12', TIME '14:00:00', TIME '18:00:00', 'DISPONIBLE'
+    UNION ALL SELECT 'miguel.torres', DATE '2026-08-26', TIME '08:00:00', TIME '12:00:00', 'NO_DISPONIBLE'
+    UNION ALL SELECT 'elena.villanueva', DATE '2026-07-31', TIME '08:00:00', TIME '12:00:00', 'DISPONIBLE'
+    UNION ALL SELECT 'elena.villanueva', DATE '2026-08-14', TIME '14:00:00', TIME '18:00:00', 'DISPONIBLE'
+    UNION ALL SELECT 'elena.villanueva', DATE '2026-08-28', TIME '08:00:00', TIME '12:00:00', 'DISPONIBLE'
+) h ON h.username = u.username
+ON DUPLICATE KEY UPDATE estado = VALUES(estado);
 
 INSERT INTO cita (
     id_paciente,
@@ -413,9 +556,9 @@ SELECT
     TRUE,
     '2026-05-19 10:30:00'
 FROM paciente p
-INNER JOIN usuario_sistema um ON um.username = 'medico'
+INNER JOIN usuario_sistema um ON um.username = 'luis.quispe'
 INNER JOIN medico m ON m.id_usuario = um.id_usuario
-LEFT JOIN usuario_sistema ur ON ur.username = 'recepcionista'
+LEFT JOIN usuario_sistema ur ON ur.username = 'valeria.nunez'
 LEFT JOIN recepcionista r ON r.id_usuario = ur.id_usuario
 WHERE p.dni = '90000001'
   AND NOT EXISTS (
@@ -451,7 +594,7 @@ SELECT
 FROM paciente p
 INNER JOIN usuario_sistema um ON um.username = 'carlos.choque'
 INNER JOIN medico m ON m.id_usuario = um.id_usuario
-LEFT JOIN usuario_sistema ur ON ur.username = 'recepcionista'
+LEFT JOIN usuario_sistema ur ON ur.username = 'valeria.nunez'
 LEFT JOIN recepcionista r ON r.id_usuario = ur.id_usuario
 WHERE p.dni = '90000004'
   AND NOT EXISTS (
@@ -487,7 +630,7 @@ SELECT
 FROM paciente p
 INNER JOIN usuario_sistema um ON um.username = 'rosa.condori'
 INNER JOIN medico m ON m.id_usuario = um.id_usuario
-LEFT JOIN usuario_sistema ur ON ur.username = 'recepcionista'
+LEFT JOIN usuario_sistema ur ON ur.username = 'valeria.nunez'
 LEFT JOIN recepcionista r ON r.id_usuario = ur.id_usuario
 WHERE p.dni = '90000003'
   AND NOT EXISTS (
@@ -517,7 +660,7 @@ INNER JOIN paciente p ON p.id_paciente = c.id_paciente
 INNER JOIN medico m ON m.id_medico = c.id_medico
 INNER JOIN usuario_sistema um ON um.id_usuario = m.id_usuario
 WHERE p.dni = '90000001'
-  AND um.username = 'medico'
+  AND um.username = 'luis.quispe'
   AND c.fecha = '2026-05-20'
   AND c.hora = '09:00:00'
   AND NOT EXISTS (
@@ -537,7 +680,7 @@ INSERT INTO usuario_sistema (
 )
 VALUES (
     'elena.villanueva',
-    'pbkdf2:sha256:1000000$demo_medico_salt$66f30174d0d6605ff86c30e50dec01f5d00a43a0a119e59be4fe56ddf2b8181d',
+    'scrypt:32768:8:1$fKg22RunzPQef4us$380faf257bc9ffeb2e8f07e0fadac07c868236e7ca87fd51cf0947a1f155372e755e422f185c05264bd9bf0a43f8ee9b163b9a3e5eb9ae1facca6aa7e6831188',
     'MEDICO',
     'ACTIVO',
     'Elena Pilar',
@@ -545,6 +688,7 @@ VALUES (
     'elena.villanueva.soto@demo-clinic.test'
 )
 ON DUPLICATE KEY UPDATE
+    username = VALUES(username),
     password_hash = VALUES(password_hash),
     rol = VALUES(rol),
     estado = VALUES(estado),
@@ -576,7 +720,7 @@ INSERT INTO horario (id_medico, fecha, hora_inicio, hora_fin, estado)
 SELECT m.id_medico, '2026-06-27', '14:00:00', '18:00:00', 'NO_DISPONIBLE'
 FROM medico m
 INNER JOIN usuario_sistema u ON u.id_usuario = m.id_usuario
-WHERE u.username = 'medico'
+WHERE u.username = 'luis.quispe'
 ON DUPLICATE KEY UPDATE estado = VALUES(estado);
 
 INSERT INTO cita (
@@ -607,7 +751,7 @@ SELECT
 FROM paciente p
 INNER JOIN usuario_sistema um ON um.username = 'rosa.condori'
 INNER JOIN medico m ON m.id_usuario = um.id_usuario
-LEFT JOIN usuario_sistema ur ON ur.username = 'recepcionista'
+LEFT JOIN usuario_sistema ur ON ur.username = 'valeria.nunez'
 LEFT JOIN recepcionista r ON r.id_usuario = ur.id_usuario
 WHERE p.dni = '90000002'
   AND NOT EXISTS (
@@ -628,7 +772,7 @@ SELECT
     'Cita demo cancelada por solicitud del paciente.'
 FROM cita c
 INNER JOIN paciente p ON p.id_paciente = c.id_paciente
-INNER JOIN usuario_sistema ur ON ur.username = 'recepcionista'
+INNER JOIN usuario_sistema ur ON ur.username = 'valeria.nunez'
 WHERE p.dni = '90000002'
   AND c.fecha = '2026-06-27'
   AND c.hora = '08:30:00'
@@ -663,7 +807,7 @@ SELECT
 FROM paciente p
 INNER JOIN usuario_sistema um ON um.username = 'elena.villanueva'
 INNER JOIN medico m ON m.id_usuario = um.id_usuario
-LEFT JOIN usuario_sistema ur ON ur.username = 'recepcionista'
+LEFT JOIN usuario_sistema ur ON ur.username = 'valeria.nunez'
 LEFT JOIN recepcionista r ON r.id_usuario = ur.id_usuario
 WHERE p.dni = '90000005'
   AND NOT EXISTS (
@@ -701,7 +845,7 @@ SELECT
 FROM paciente p
 INNER JOIN usuario_sistema um ON um.username = 'elena.villanueva'
 INNER JOIN medico m ON m.id_usuario = um.id_usuario
-LEFT JOIN usuario_sistema ur ON ur.username = 'recepcionista'
+LEFT JOIN usuario_sistema ur ON ur.username = 'valeria.nunez'
 LEFT JOIN recepcionista r ON r.id_usuario = ur.id_usuario
 INNER JOIN cita origen
     ON origen.id_paciente = p.id_paciente
@@ -745,7 +889,7 @@ FROM cita origen
 INNER JOIN paciente p ON p.id_paciente = origen.id_paciente
 INNER JOIN usuario_sistema um ON um.username = 'elena.villanueva'
 INNER JOIN medico m ON m.id_usuario = um.id_usuario AND m.id_medico = origen.id_medico
-INNER JOIN usuario_sistema ur ON ur.username = 'recepcionista'
+INNER JOIN usuario_sistema ur ON ur.username = 'valeria.nunez'
 INNER JOIN cita nueva
     ON nueva.id_cita_origen = origen.id_cita
     AND nueva.fecha = '2026-06-28'
@@ -792,7 +936,7 @@ INSERT INTO horario (id_medico, fecha, hora_inicio, hora_fin, estado)
 SELECT m.id_medico, '2026-06-25', '08:00:00', '12:00:00', 'DISPONIBLE'
 FROM medico m
 INNER JOIN usuario_sistema u ON u.id_usuario = m.id_usuario
-WHERE u.username = 'medico'
+WHERE u.username = 'luis.quispe'
 ON DUPLICATE KEY UPDATE estado = VALUES(estado);
 
 INSERT INTO horario (id_medico, fecha, hora_inicio, hora_fin, estado)
@@ -819,9 +963,9 @@ ON DUPLICATE KEY UPDATE estado = VALUES(estado);
 INSERT INTO cita (id_paciente, id_medico, id_recepcionista, fecha, hora, estado, motivo_consulta, notificado, fecha_notificacion)
 SELECT p.id_paciente, m.id_medico, r.id_recepcionista, '2026-06-25', '09:00:00', 'CONFIRMADA', 'Control de presión arterial', TRUE, '2026-06-24 16:20:00'
 FROM paciente p
-INNER JOIN usuario_sistema um ON um.username = 'medico'
+INNER JOIN usuario_sistema um ON um.username = 'luis.quispe'
 INNER JOIN medico m ON m.id_usuario = um.id_usuario
-LEFT JOIN usuario_sistema ur ON ur.username = 'recepcionista'
+LEFT JOIN usuario_sistema ur ON ur.username = 'valeria.nunez'
 LEFT JOIN recepcionista r ON r.id_usuario = ur.id_usuario
 WHERE p.dni = '90000002'
   AND NOT EXISTS (SELECT 1 FROM cita c WHERE c.id_paciente = p.id_paciente AND c.id_medico = m.id_medico AND c.fecha = '2026-06-25' AND c.hora = '09:00:00');
@@ -831,7 +975,7 @@ SELECT p.id_paciente, m.id_medico, r.id_recepcionista, '2026-06-25', '10:30:00',
 FROM paciente p
 INNER JOIN usuario_sistema um ON um.username = 'ana.huaman'
 INNER JOIN medico m ON m.id_usuario = um.id_usuario
-LEFT JOIN usuario_sistema ur ON ur.username = 'recepcionista'
+LEFT JOIN usuario_sistema ur ON ur.username = 'valeria.nunez'
 LEFT JOIN recepcionista r ON r.id_usuario = ur.id_usuario
 WHERE p.dni = '90000005'
   AND NOT EXISTS (SELECT 1 FROM cita c WHERE c.id_paciente = p.id_paciente AND c.id_medico = m.id_medico AND c.fecha = '2026-06-25' AND c.hora = '10:30:00');
@@ -841,7 +985,7 @@ SELECT p.id_paciente, m.id_medico, r.id_recepcionista, '2026-06-26', '09:30:00',
 FROM paciente p
 INNER JOIN usuario_sistema um ON um.username = 'carlos.choque'
 INNER JOIN medico m ON m.id_usuario = um.id_usuario
-LEFT JOIN usuario_sistema ur ON ur.username = 'recepcionista'
+LEFT JOIN usuario_sistema ur ON ur.username = 'valeria.nunez'
 LEFT JOIN recepcionista r ON r.id_usuario = ur.id_usuario
 WHERE p.dni = '90000004'
   AND NOT EXISTS (SELECT 1 FROM cita c WHERE c.id_paciente = p.id_paciente AND c.id_medico = m.id_medico AND c.fecha = '2026-06-26' AND c.hora = '09:30:00');
@@ -851,7 +995,7 @@ SELECT p.id_paciente, m.id_medico, r.id_recepcionista, '2026-06-24', '15:00:00',
 FROM paciente p
 INNER JOIN usuario_sistema um ON um.username = 'miguel.torres'
 INNER JOIN medico m ON m.id_usuario = um.id_usuario
-LEFT JOIN usuario_sistema ur ON ur.username = 'recepcionista'
+LEFT JOIN usuario_sistema ur ON ur.username = 'valeria.nunez'
 LEFT JOIN recepcionista r ON r.id_usuario = ur.id_usuario
 WHERE p.dni = '90000006'
   AND NOT EXISTS (SELECT 1 FROM cita c WHERE c.id_paciente = p.id_paciente AND c.id_medico = m.id_medico AND c.fecha = '2026-06-24' AND c.hora = '15:00:00');
@@ -860,7 +1004,7 @@ INSERT INTO cita_evento (id_cita, id_usuario_actor, tipo_evento, detalle)
 SELECT c.id_cita, ur.id_usuario, 'NOTIFICADA', 'Recordatorio enviado al paciente.'
 FROM cita c
 INNER JOIN paciente p ON p.id_paciente = c.id_paciente
-INNER JOIN usuario_sistema ur ON ur.username = 'recepcionista'
+INNER JOIN usuario_sistema ur ON ur.username = 'valeria.nunez'
 WHERE p.dni = '90000002'
   AND c.fecha = '2026-06-25'
   AND c.hora = '09:00:00'

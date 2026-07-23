@@ -1,6 +1,7 @@
 from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
 from mysql.connector import Error as MySQLError
 
+from app.models.historial_cita_model import HistorialCitaModel
 from app.models.medico_model import MedicoModel
 from app.models.paciente_model import PacienteModel
 from app.utils.auth import get_current_user, roles_required
@@ -12,6 +13,7 @@ pacientes_bp = Blueprint("pacientes", __name__)
 logger = get_logger(__name__)
 paciente_model = PacienteModel()
 medico_model = MedicoModel()
+historial_model = HistorialCitaModel()
 
 
 @pacientes_bp.get("/pacientes")
@@ -116,6 +118,55 @@ def editar(id_paciente: int):
     )
 
 
+@pacientes_bp.get("/pacientes/<int:id_paciente>/historial")
+@roles_required("ADMINISTRADOR", "RECEPCIONISTA", "MEDICO")
+def historial(id_paciente: int):
+    busqueda = (request.args.get("q") or "").strip()
+    usuario = get_current_user()
+
+    try:
+        paciente = paciente_model.obtener_por_id(id_paciente)
+    except MySQLError:
+        log_error_tecnico(logger, "Error obteniendo paciente para historial")
+        flash("No pudimos cargar el paciente solicitado.", "error")
+        return redirect(url_for("pacientes.index"))
+
+    if not paciente:
+        abort(404)
+
+    if usuario and usuario.get("rol") == "MEDICO":
+        id_medico = _obtener_id_medico_actual()
+        if not id_medico:
+            return redirect(url_for("pacientes.index"))
+
+        try:
+            puede_ver = paciente_model.tiene_cita_con_medico(id_paciente, id_medico)
+        except MySQLError:
+            log_error_tecnico(logger, "Error validando acceso medico a historial de paciente")
+            flash("No pudimos validar tu acceso al historial del paciente.", "error")
+            return redirect(url_for("pacientes.index"))
+
+        if not puede_ver:
+            abort(403)
+
+    try:
+        historiales = historial_model.listar_por_paciente(id_paciente, busqueda or None)
+    except MySQLError:
+        log_error_tecnico(logger, "Error listando historial del paciente")
+        flash("No pudimos cargar el historial del paciente.", "error")
+        historiales = []
+
+    return render_template(
+        "pacientes/historial.html",
+        page_title="Historial del Paciente",
+        page_kicker="Seguimiento clinico",
+        paciente=paciente,
+        historiales=historiales,
+        indicadores=_crear_indicadores_historial_paciente(historiales),
+        busqueda=busqueda,
+    )
+
+
 def _crear_indicadores(pacientes: list[dict]) -> list[dict]:
     total = len(pacientes)
     con_contacto = sum(1 for paciente in pacientes if paciente.get("telefono") or paciente.get("email"))
@@ -150,6 +201,20 @@ def _crear_segmentos(pacientes: list[dict]) -> list[dict]:
         {"nombre": "Adultos", "cantidad": adultos},
         {"nombre": "Adultos mayores", "cantidad": mayores},
         {"nombre": "Sin fecha de nacimiento", "cantidad": sin_fecha},
+    ]
+
+
+def _crear_indicadores_historial_paciente(historiales: list[dict]) -> list[dict]:
+    total = len(historiales)
+    medicos = {historial.get("medico") for historial in historiales if historial.get("medico")}
+    especialidades = {historial.get("especialidad") for historial in historiales if historial.get("especialidad")}
+
+    ultima_atencion = historiales[0].get("fecha_atencion") if historiales else "Sin atenciones"
+
+    return [
+        {"titulo": "Atenciones", "valor": total, "detalle": "Registradas para el paciente", "tono": "primary"},
+        {"titulo": "Especialidades", "valor": len(especialidades), "detalle": "Areas en las que fue atendido", "tono": "success"},
+        {"titulo": "Ultima atencion", "valor": ultima_atencion, "detalle": f"{len(medicos)} medico(s) registrados", "tono": "info"},
     ]
 
 

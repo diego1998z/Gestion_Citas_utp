@@ -1,21 +1,31 @@
 {% extends "layouts/app.html" %}
 {% import "partials/ui.html" as ui %}
 
-{% block title %}Historial de Citas | Gestion de Citas Medicas{% endblock %}
+{% block title %}Historial de Citas | Gestión de Citas Médicas{% endblock %}
 
 {% block content %}
-{{ ui.page_hero("Seguimiento clinico", "Historial de citas", "Atenciones generadas desde citas reales. El paciente se obtiene mediante la cita; historial no duplica id_paciente.", "Ver citas", url_for('citas.index')) }}
+{% if rol_actual == "MEDICO" %}
+{{ ui.page_hero("Seguimiento clínico", "Mis atenciones", "Consultá las atenciones registradas para tus pacientes y revisá la evolución clínica de cada caso.", "Ver mis citas", url_for('citas.index')) }}
+{% else %}
+{{ ui.page_hero("Seguimiento clínico", "Historial de citas", "Consulta las atenciones registradas por paciente, médico y especialidad.", "Ver citas", url_for('citas.index')) }}
+{% endif %}
 {{ ui.metric_grid(indicadores, compact=True, aria_label="Indicadores de historial") }}
 
 <article class="rounded-[1.5rem] border border-outline-variant/70 bg-white p-5 shadow-soft">
-    <div class="mb-4 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between"><div><p class="text-xs font-black uppercase tracking-[0.14em] text-secondary">Registros</p><h3 class="mt-1 text-xl font-black tracking-tight text-primary">Atenciones recientes</h3></div><form action="{{ url_for('historial.index') }}" method="get" class="relative"><label class="sr-only" for="buscar-historial">Buscar historial</label><span class="material-symbols-rounded pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-outline" aria-hidden="true">search</span><input id="buscar-historial" name="q" type="search" value="{{ busqueda }}" placeholder="Buscar por paciente, medico o diagnostico" class="h-11 w-full rounded-full border border-outline-variant bg-white py-2 pl-10 pr-4 text-sm font-semibold outline-none transition focus:border-secondary-container focus:ring-4 focus:ring-blue-200/70 lg:w-96"></form></div>
+    <div class="mb-4 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between"><div><p class="text-xs font-black uppercase tracking-[0.14em] text-secondary">Registros</p><h3 class="mt-1 text-xl font-black tracking-tight text-primary">Atenciones recientes</h3></div><form action="{{ url_for('historial.index') }}" method="get" class="relative"><label class="sr-only" for="buscar-historial">Buscar historial</label><span class="material-symbols-rounded pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-outline" aria-hidden="true">search</span><input id="buscar-historial" name="q" type="search" value="{{ busqueda }}" placeholder="{% if rol_actual == 'MEDICO' %}Buscar por paciente u observación{% else %}Buscar por paciente, médico o diagnóstico{% endif %}" class="h-11 w-full rounded-full border border-outline-variant bg-white py-2 pl-10 pr-4 text-sm font-semibold outline-none transition focus:border-secondary-container focus:ring-4 focus:ring-blue-200/70 lg:w-96"></form></div>
     <div class="grid gap-4">
         {% for historial in historiales %}
             <article class="grid gap-4 rounded-2xl border border-outline-variant/70 bg-white p-4 shadow-sm md:grid-cols-[10rem_minmax(0,1fr)]">
                 <div class="grid content-start gap-1 text-primary"><strong class="font-black">{{ historial.fecha_atencion }}</strong><span class="text-sm font-semibold text-slate-500">{{ historial.codigo }}</span></div>
                 <div>
                     <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"><div><h4 class="font-black text-slate-900">{{ historial.paciente }}</h4><p class="mt-1 text-sm font-semibold text-slate-500">DNI {{ historial.paciente_dni }} · Cita {{ historial.id_cita }}</p></div>{{ ui.status_badge(historial.estado_cita) }}</div>
-                    <dl class="mt-4 grid gap-4 md:grid-cols-3"><div><dt class="text-sm font-semibold text-slate-500">Medico</dt><dd class="mt-1 font-black text-slate-800">{{ historial.medico }}</dd></div><div><dt class="text-sm font-semibold text-slate-500">Especialidad</dt><dd class="mt-1 font-black text-slate-800">{{ historial.especialidad }}</dd></div><div><dt class="text-sm font-semibold text-slate-500">Observacion clinica</dt><dd class="mt-1 font-black text-slate-800">{{ historial.observaciones or historial.diagnostico }}</dd></div></dl>
+                    {% if rol_actual == "MEDICO" %}
+                        <dl class="mt-4 grid gap-4">
+                            <div><dt class="text-sm font-semibold text-slate-500">Observación clínica</dt><dd class="mt-1 font-black text-slate-800">{{ historial.observaciones or historial.diagnostico }}</dd></div>
+                        </dl>
+                    {% else %}
+                        <dl class="mt-4 grid gap-4 md:grid-cols-3"><div><dt class="text-sm font-semibold text-slate-500">Médico</dt><dd class="mt-1 font-black text-slate-800">{{ historial.medico }}</dd></div><div><dt class="text-sm font-semibold text-slate-500">Especialidad</dt><dd class="mt-1 font-black text-slate-800">{{ historial.especialidad }}</dd></div><div><dt class="text-sm font-semibold text-slate-500">Observación clínica</dt><dd class="mt-1 font-black text-slate-800">{{ historial.observaciones or historial.diagnostico }}</dd></div></dl>
+                    {% endif %}
                 </div>
             </article>
         {% else %}<p class="rounded-2xl border border-outline-variant/60 bg-blue-50/50 p-4 text-sm font-semibold text-slate-500">No hay historiales registrados para mostrar.</p>{% endfor %}

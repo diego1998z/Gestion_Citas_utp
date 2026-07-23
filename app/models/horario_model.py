@@ -6,10 +6,27 @@ from config.database import get_cursor, transaction
 class HorarioModel:
     """Modelo de disponibilidad horaria de médicos."""
 
-    def listar_por_medico(self, id_medico: int) -> list[dict[str, Any]]:
+    def listar_por_medico(
+        self,
+        id_medico: int,
+        *,
+        solo_futuros: bool = False,
+        solo_disponibles: bool = False,
+    ) -> list[dict[str, Any]]:
+        filtros = ["id_medico = %s"]
+        parametros: list[Any] = [id_medico]
+
+        if solo_futuros:
+            filtros.append("fecha >= CURDATE()")
+
+        if solo_disponibles:
+            filtros.append("estado = 'DISPONIBLE'")
+
+        where_sql = " AND ".join(filtros)
+
         with get_cursor(dictionary=True) as (_, cursor):
             cursor.execute(
-                """
+                f"""
                 SELECT
                     id_horario,
                     id_medico,
@@ -18,10 +35,10 @@ class HorarioModel:
                     hora_fin,
                     estado
                 FROM horario
-                WHERE id_medico = %s
+                WHERE {where_sql}
                 ORDER BY fecha ASC, hora_inicio ASC
                 """,
-                (id_medico,),
+                tuple(parametros),
             )
             return cursor.fetchall()
 

@@ -284,7 +284,7 @@ class CitaModel:
         return busqueda or None
 
     def listar_horarios_disponibles(self, id_medico: int | None = None) -> list[dict[str, Any]]:
-        filtros = ["h.estado = 'DISPONIBLE'"]
+        filtros = ["h.estado = 'DISPONIBLE'", "h.fecha >= CURDATE()"]
         parametros: list[Any] = []
 
         if id_medico:
@@ -707,9 +707,10 @@ class CitaModel:
             FROM horario
             WHERE id_medico = %s
               AND fecha = %s
+              AND fecha >= CURDATE()
               AND estado = 'DISPONIBLE'
-              AND %s >= TIME_FORMAT(hora_inicio, '%%H:%%i')
-              AND %s < TIME_FORMAT(hora_fin, '%%H:%%i')
+              AND %s >= TIME_FORMAT(hora_inicio, '%H:%i')
+              AND %s < TIME_FORMAT(hora_fin, '%H:%i')
             LIMIT 1
             """,
             (id_medico, fecha, hora, hora),
@@ -737,7 +738,7 @@ class CitaModel:
             FROM cita
             WHERE id_medico = %s
               AND fecha = %s
-              AND TIME_FORMAT(hora, '%%H:%%i') = %s
+              AND TIME_FORMAT(hora, '%H:%i') = %s
               AND estado IN ('PENDIENTE', 'CONFIRMADA')
               {filtro_exclusion}
             LIMIT 1

@@ -44,10 +44,10 @@ pip install -r requirements.txt
 3. Copiar configuración de ejemplo:
 
 ```powershell
-Copy-Item .env.example .env
+Copy-Item .env.example config/.env
 ```
 
-4. Editar `.env` con tus credenciales MySQL:
+4. Editar `config/.env` con tus credenciales MySQL y SMTP:
 
 ```env
 FLASK_APP=run.py
@@ -60,6 +60,13 @@ MYSQL_PASSWORD=
 MYSQL_DATABASE=gestion_citas_medicas
 LOG_LEVEL=INFO
 WTF_CSRF_TIME_LIMIT=3600
+
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USE_TLS=true
+SMTP_USER=tu-correo@gmail.com
+SMTP_PASSWORD=tu-app-password
+SMTP_FROM=tu-correo@gmail.com
 ```
 
 ## Creación de base de datos
@@ -110,7 +117,7 @@ No hay paso de build: el proyecto usa Flask con templates renderizados en servid
 - No permitir dos citas activas (`PENDIENTE` o `CONFIRMADA`) para el mismo médico, fecha y hora.
 - Confirmar únicamente citas en estado `PENDIENTE`.
 - Cancelar una cita registra motivo y fecha de cancelación.
-- Notificar al paciente actualiza `notificado` y `fecha_notificacion`.
+- Notificar al paciente envía correo por SMTP y, si el envío fue exitoso, actualiza `notificado` y `fecha_notificacion`. Para Gmail, configurá `SMTP_USER`, `SMTP_PASSWORD` con una App Password y `SMTP_FROM` en `config/.env`.
 - Reprogramar crea una nueva cita y marca la original como `REPROGRAMADA`.
 - El historial se genera desde una cita existente; `historial_cita` no duplica `id_paciente`.
 

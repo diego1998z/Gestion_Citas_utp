@@ -30,19 +30,79 @@
                         <td class="px-3 py-4">{{ cita.medico }}</td><td class="px-3 py-4">{{ cita.especialidad }}</td>
                         <td class="px-3 py-4">{% if cita.notificado %}Sí{% if cita.fecha_notificacion %}<small class="block text-sm font-semibold text-slate-500">{{ cita.fecha_notificacion }}</small>{% endif %}{% else %}No{% endif %}</td>
                         <td class="px-3 py-4">{{ ui.status_badge(cita.estado) }}</td>
-                        <td class="px-3 py-4">
-                            <div class="flex min-w-56 flex-wrap items-center gap-2">
+                        <td class="actions-cell px-3 py-4">
+                            {% set acciones = namespace(disponibles=false) %}
+                            <div class="actions-panel" aria-label="Acciones para la cita {{ cita.codigo }}">
+                                <div class="actions-primary" aria-label="Acciones principales">
+                                    {% if current_user.rol in ["ADMINISTRADOR", "RECEPCIONISTA"] and es_activa %}
+                                        {% if cita.estado == "PENDIENTE" %}
+                                            {% set acciones.disponibles = true %}
+                                            <form action="{{ url_for('citas.confirmar', id_cita=cita.id_cita) }}" method="post" class="action-form">
+                                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                <button class="action-button action-button--success" type="submit" title="Confirmar esta cita">
+                                                    <span class="material-symbols-rounded action-button__icon" aria-hidden="true">check_circle</span>
+                                                    Confirmar
+                                                </button>
+                                            </form>
+                                        {% endif %}
+
+                                        {% if not cita.notificado %}
+                                            {% set acciones.disponibles = true %}
+                                            <form action="{{ url_for('citas.notificar', id_cita=cita.id_cita) }}" method="post" class="action-form">
+                                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                <button class="action-button action-button--info" type="submit" title="Enviar notificación al paciente">
+                                                    <span class="material-symbols-rounded action-button__icon" aria-hidden="true">notifications</span>
+                                                    Notificar
+                                                </button>
+                                            </form>
+                                        {% endif %}
+
+                                        {% set acciones.disponibles = true %}
+                                        <a class="action-button action-button--secondary" href="{{ url_for('citas.reprogramar', id_cita=cita.id_cita) }}" title="Cambiar fecha u hora de la cita">
+                                            <span class="material-symbols-rounded action-button__icon" aria-hidden="true">event_repeat</span>
+                                            Reprogramar
+                                        </a>
+                                    {% endif %}
+
+                                    {% if current_user.rol in ["ADMINISTRADOR", "MEDICO"] and es_activa %}
+                                        {% set acciones.disponibles = true %}
+                                        <a class="action-button action-button--primary-outline" href="{{ url_for('historial.nuevo_desde_cita', id_cita=cita.id_cita) }}" title="Registrar atención médica">
+                                            <span class="material-symbols-rounded action-button__icon" aria-hidden="true">medical_services</span>
+                                            Atender
+                                        </a>
+                                        <form action="{{ url_for('citas.marcar_no_asistio', id_cita=cita.id_cita) }}" method="post" class="action-form">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <button class="action-button action-button--neutral" type="submit" title="Marcar que el paciente no asistió">
+                                                <span class="material-symbols-rounded action-button__icon" aria-hidden="true">person_cancel</span>
+                                                No asistió
+                                            </button>
+                                        </form>
+                                    {% elif current_user.rol in ["ADMINISTRADOR", "MEDICO"] and cita.estado == "ATENDIDA" and not cita.tiene_historial %}
+                                        {% set acciones.disponibles = true %}
+                                        <a class="action-button action-button--primary-outline" href="{{ url_for('historial.nuevo_desde_cita', id_cita=cita.id_cita) }}" title="Crear historial para una cita atendida">
+                                            <span class="material-symbols-rounded action-button__icon" aria-hidden="true">note_add</span>
+                                            Crear historial
+                                        </a>
+                                    {% endif %}
+                                </div>
+
                                 {% if current_user.rol in ["ADMINISTRADOR", "RECEPCIONISTA"] and es_activa %}
-                                    {% if cita.estado == "PENDIENTE" %}<form action="{{ url_for('citas.confirmar', id_cita=cita.id_cita) }}" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="rounded-xl bg-emerald-600 px-3 py-2 text-xs font-black text-white hover:bg-emerald-700" type="submit">Confirmar</button></form>{% endif %}
-                                    {% if not cita.notificado %}<form action="{{ url_for('citas.notificar', id_cita=cita.id_cita) }}" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="rounded-xl border border-outline-variant bg-white px-3 py-2 text-xs font-black text-primary hover:bg-blue-50" type="submit">Notificar</button></form>{% endif %}
-                                    <a class="rounded-xl border border-outline-variant bg-white px-3 py-2 text-xs font-black text-primary hover:bg-blue-50" href="{{ url_for('citas.reprogramar', id_cita=cita.id_cita) }}">Reprogramar</a>
-                                    <form action="{{ url_for('citas.cancelar', id_cita=cita.id_cita) }}" method="post" class="flex flex-wrap items-center gap-2"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><label class="sr-only" for="motivo-cancelacion-{{ cita.id_cita }}">Motivo</label><input id="motivo-cancelacion-{{ cita.id_cita }}" name="motivo_cancelacion" type="text" placeholder="Motivo" required class="h-9 w-28 rounded-xl border border-outline-variant px-3 text-xs outline-none focus:border-secondary-container"><button class="rounded-xl bg-red-600 px-3 py-2 text-xs font-black text-white hover:bg-red-700" type="submit">Cancelar</button></form>
+                                    <div class="actions-danger-zone" aria-label="Cancelación de cita">
+                                        <p class="actions-danger-zone__label">Cancelar cita</p>
+                                        <form action="{{ url_for('citas.cancelar', id_cita=cita.id_cita) }}" method="post" class="action-form action-form--cancel">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <label class="sr-only" for="motivo-cancelacion-{{ cita.id_cita }}">Motivo de cancelación</label>
+                                            <input id="motivo-cancelacion-{{ cita.id_cita }}" name="motivo_cancelacion" type="text" placeholder="Motivo de cancelación" required class="action-input" title="Ingresá el motivo antes de cancelar">
+                                            <button class="action-button action-button--danger" type="submit" title="Cancelar esta cita">
+                                                <span class="material-symbols-rounded action-button__icon" aria-hidden="true">cancel</span>
+                                                Cancelar
+                                            </button>
+                                        </form>
+                                    </div>
                                 {% endif %}
-                                {% if current_user.rol in ["ADMINISTRADOR", "MEDICO"] and es_activa %}
-                                    <a class="rounded-xl border border-outline-variant bg-white px-3 py-2 text-xs font-black text-primary hover:bg-blue-50" href="{{ url_for('historial.nuevo_desde_cita', id_cita=cita.id_cita) }}">Atender</a>
-                                    <form action="{{ url_for('citas.marcar_no_asistio', id_cita=cita.id_cita) }}" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="rounded-xl border border-outline-variant bg-white px-3 py-2 text-xs font-black text-primary hover:bg-blue-50" type="submit">No asistió</button></form>
-                                {% elif current_user.rol in ["ADMINISTRADOR", "MEDICO"] and cita.estado == "ATENDIDA" and not cita.tiene_historial %}
-                                    <a class="rounded-xl border border-outline-variant bg-white px-3 py-2 text-xs font-black text-primary hover:bg-blue-50" href="{{ url_for('historial.nuevo_desde_cita', id_cita=cita.id_cita) }}">Crear historial</a>
+
+                                {% if not acciones.disponibles %}
+                                    <span class="actions-empty" aria-label="Sin acciones disponibles para esta cita">Sin acciones disponibles</span>
                                 {% endif %}
                             </div>
                         </td>

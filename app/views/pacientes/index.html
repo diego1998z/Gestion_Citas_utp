@@ -7,7 +7,7 @@
 {{ ui.page_hero(
     "Modulo de admision",
     "Gestion de pacientes",
-    "Registro de pacientes conectado al modelo. La vista no consulta la base de datos: solo renderiza datos preparados por el controlador.",
+    "Registro, busqueda y actualizacion de pacientes de la clinica.",
     "Registrar paciente" if current_user.rol in ["ADMINISTRADOR", "RECEPCIONISTA"] else None,
     url_for("pacientes.nuevo")
 ) }}
@@ -32,7 +32,7 @@
             <table class="min-w-full border-collapse text-left text-sm">
                 <thead>
                     <tr class="border-b border-outline-variant/70 text-xs font-black uppercase tracking-wider text-outline">
-                        <th class="px-3 py-3">Codigo</th><th class="px-3 py-3">Paciente</th><th class="px-3 py-3">Documento</th><th class="px-3 py-3">Contacto</th><th class="px-3 py-3">Ultima cita</th>{% if current_user.rol in ["ADMINISTRADOR", "RECEPCIONISTA"] %}<th class="px-3 py-3">Acciones</th>{% endif %}
+                        <th class="px-3 py-3">Codigo</th><th class="px-3 py-3">Paciente</th><th class="px-3 py-3">Documento</th><th class="px-3 py-3">Contacto</th><th class="px-3 py-3">Ultima cita</th><th class="px-3 py-3">Acciones</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-outline-variant/60">
@@ -43,12 +43,17 @@
                             <td class="px-3 py-4">DNI {{ paciente.dni }}</td>
                             <td class="px-3 py-4">{{ paciente.telefono or "Sin telefono" }}<small class="block text-sm font-semibold text-slate-500">{{ paciente.email or "Sin correo" }}</small></td>
                             <td class="px-3 py-4">{{ paciente.ultima_cita or "Sin cita" }}</td>
-                            {% if current_user.rol in ["ADMINISTRADOR", "RECEPCIONISTA"] %}
-                                <td class="px-3 py-4"><a class="font-black text-secondary hover:text-primary hover:underline" href="{{ url_for('pacientes.editar', id_paciente=paciente.id_paciente) }}">Editar</a></td>
-                            {% endif %}
+                            <td class="px-3 py-4">
+                                <div class="flex flex-col gap-2">
+                                    <a class="font-black text-secondary hover:text-primary hover:underline" href="{{ url_for('pacientes.historial', id_paciente=paciente.id_paciente) }}">Ver historial</a>
+                                    {% if current_user.rol in ["ADMINISTRADOR", "RECEPCIONISTA"] %}
+                                        <a class="font-black text-secondary hover:text-primary hover:underline" href="{{ url_for('pacientes.editar', id_paciente=paciente.id_paciente) }}">Editar</a>
+                                    {% endif %}
+                                </div>
+                            </td>
                         </tr>
                     {% else %}
-                        <tr><td class="px-3 py-6 text-center font-semibold text-slate-500" colspan="{{ 6 if current_user.rol in ['ADMINISTRADOR', 'RECEPCIONISTA'] else 5 }}">No hay pacientes para mostrar.</td></tr>
+                        <tr><td class="px-3 py-6 text-center font-semibold text-slate-500" colspan="6">No hay pacientes para mostrar.</td></tr>
                     {% endfor %}
                 </tbody>
             </table>
@@ -70,11 +75,6 @@
             {% else %}
                 <p class="text-sm font-semibold text-slate-500">No hay segmentos cargados.</p>
             {% endfor %}
-        </div>
-
-        <div class="mt-5 border-t border-outline-variant/70 pt-5">
-            <p class="text-xs font-black uppercase tracking-[0.14em] text-secondary">Regla MVC</p>
-            <p class="mt-2 text-sm leading-6 text-slate-500">SQL en modelos, validacion en controlador/utils y render simple aca. Esa separacion mantiene el modulo preparado para crecer sin mezclar responsabilidades.</p>
         </div>
     </aside>
 </section>
