@@ -2,6 +2,8 @@ from datetime import datetime
 
 from werkzeug.datastructures import MultiDict
 
+from app.utils.security import ROLES_VALIDOS
+
 
 MAX_USERNAME_LENGTH = 50
 MAX_PASSWORD_LENGTH = 128
@@ -15,10 +17,12 @@ ESTADOS_HORARIO = {"DISPONIBLE", "NO_DISPONIBLE"}
 def validar_login_form(form: MultiDict) -> tuple[dict[str, str], dict[str, str]]:
     username = (form.get("username") or "").strip()
     password = form.get("password") or ""
+    rol = _normalizar_texto(form.get("rol")).upper() or "ADMINISTRADOR"
 
     datos = {
         "username": username,
         "password": password,
+        "rol": rol,
     }
     errores: dict[str, str] = {}
 
@@ -31,6 +35,9 @@ def validar_login_form(form: MultiDict) -> tuple[dict[str, str], dict[str, str]]
         errores["password"] = "Ingresá tu contraseña."
     elif len(password) > MAX_PASSWORD_LENGTH:
         errores["password"] = f"La contraseña no puede superar {MAX_PASSWORD_LENGTH} caracteres."
+
+    if rol not in ROLES_VALIDOS:
+        errores["rol"] = "Seleccioná un rol válido."
 
     return datos, errores
 

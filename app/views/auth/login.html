@@ -46,21 +46,22 @@
                     <p class="mt-3 text-sm font-medium leading-6 text-on-surface-variant">Ingrese sus credenciales para acceder al panel.</p>
                 </div>
 
-                <form method="post" action="{{ url_for('auth.login', next=request.args.get('next')) if request.args.get('next') else url_for('auth.login') }}" class="grid gap-5" novalidate>
-                    <input id="rol" name="rol" type="hidden" value="ADMINISTRADOR">
+                {% set selected_rol = form_data.rol if form_data and form_data.rol else "ADMINISTRADOR" %}
+                <form method="post" action="{{ url_for('auth.login', next=request.args.get('next')) if request.args.get('next') else url_for('auth.login') }}" class="grid gap-5" novalidate><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input id="rol" name="rol" type="hidden" value="{{ selected_rol }}">
 
-                    <div class="grid grid-cols-3 gap-3" aria-label="Selector visual de rol">
-                        <button type="button" data-role-option="ADMINISTRADOR" aria-pressed="true" class="rounded-lg border border-primary bg-primary px-3 py-3 text-center text-xs font-black text-white shadow-sm transition hover:bg-secondary">
-                            <span class="material-symbols-rounded mx-auto mb-1 block text-2xl" aria-hidden="true">admin_panel_settings</span>
-                            <span>Administrador</span>
+                    <div class="grid grid-cols-3 gap-3" aria-label="Selector visual de rol" data-role-selector>
+                        <button type="button" data-role-option="ADMINISTRADOR" aria-pressed="{{ 'true' if selected_rol == 'ADMINISTRADOR' else 'false' }}" class="role-option {{ 'role-option--active' if selected_rol == 'ADMINISTRADOR' else '' }}">
+                            <span class="role-option__icon material-symbols-rounded" aria-hidden="true">admin_panel_settings</span>
+                            <span class="role-option__label">Administrador</span>
                         </button>
-                        <button type="button" data-role-option="MEDICO" aria-pressed="false" class="rounded-lg border border-outline-variant bg-surface px-3 py-3 text-center text-xs font-black text-on-surface-variant shadow-sm transition hover:border-primary hover:text-primary">
-                            <span class="material-symbols-rounded mx-auto mb-1 block text-2xl" aria-hidden="true">medical_services</span>
-                            <span>Médico</span>
+                        <button type="button" data-role-option="MEDICO" aria-pressed="{{ 'true' if selected_rol == 'MEDICO' else 'false' }}" class="role-option {{ 'role-option--active' if selected_rol == 'MEDICO' else '' }}">
+                            <span class="role-option__icon material-symbols-rounded" aria-hidden="true">medical_services</span>
+                            <span class="role-option__label">Médico</span>
                         </button>
-                        <button type="button" data-role-option="RECEPCIONISTA" aria-pressed="false" class="rounded-lg border border-outline-variant bg-surface px-3 py-3 text-center text-xs font-black text-on-surface-variant shadow-sm transition hover:border-primary hover:text-primary">
-                            <span class="material-symbols-rounded mx-auto mb-1 block text-2xl" aria-hidden="true">support_agent</span>
-                            <span>Recepcionista</span>
+                        <button type="button" data-role-option="RECEPCIONISTA" aria-pressed="{{ 'true' if selected_rol == 'RECEPCIONISTA' else 'false' }}" class="role-option {{ 'role-option--active' if selected_rol == 'RECEPCIONISTA' else '' }}">
+                            <span class="role-option__icon material-symbols-rounded" aria-hidden="true">support_agent</span>
+                            <span class="role-option__label">Recepcionista</span>
                         </button>
                     </div>
 
