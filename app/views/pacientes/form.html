@@ -7,7 +7,7 @@
 {{ ui.page_hero(page_kicker, page_title, "Carga datos consistentes del paciente. El controlador valida y PacienteModel persiste con consultas parametrizadas.", "Volver al listado", url_for("pacientes.index")) }}
 
 <section class="rounded-[1.5rem] border border-outline-variant/70 bg-white p-5 shadow-soft">
-    <form action="{{ action_url }}" method="post" novalidate class="grid gap-5">
+    <form action="{{ action_url }}" method="post" novalidate class="grid gap-5"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="grid gap-5 md:grid-cols-2">
             <label class="grid gap-2" for="dni"><span class="text-sm font-black text-slate-800">DNI *</span><input id="dni" name="dni" type="text" maxlength="15" value="{{ form_data.dni|default('', true) }}" required class="rounded-2xl border border-outline-variant bg-white px-4 py-3 outline-none transition focus:border-secondary-container focus:ring-4 focus:ring-blue-200/70">{% if errors.dni %}<small class="text-sm font-bold text-red-600">{{ errors.dni }}</small>{% endif %}</label>
             <label class="grid gap-2" for="fecha_nacimiento"><span class="text-sm font-black text-slate-800">Fecha de nacimiento</span><input id="fecha_nacimiento" name="fecha_nacimiento" type="date" value="{{ form_data.fecha_nacimiento|default('', true) }}" class="rounded-2xl border border-outline-variant bg-white px-4 py-3 outline-none transition focus:border-secondary-container focus:ring-4 focus:ring-blue-200/70">{% if errors.fecha_nacimiento %}<small class="text-sm font-bold text-red-600">{{ errors.fecha_nacimiento }}</small>{% endif %}</label>

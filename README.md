@@ -8,7 +8,7 @@ Sistema web MVC para la Clínica Universitaria de Comas. Permite registrar pacie
 - Frontend: HTML, CSS y JavaScript server-rendered.
 - Base de datos: MySQL con motor InnoDB.
 - Arquitectura: MVC con Blueprints de Flask.
-- Seguridad: sesión Flask, roles, hashing de contraseñas con Werkzeug y consultas SQL parametrizadas.
+- Seguridad: sesión Flask, roles, hashing de contraseñas con Werkzeug, consultas SQL parametrizadas, protección CSRF en formularios POST y `SECRET_KEY` obligatoria en producción.
 
 ## Estructura MVC
 
@@ -59,12 +59,7 @@ MYSQL_USER=root
 MYSQL_PASSWORD=
 MYSQL_DATABASE=gestion_citas_medicas
 LOG_LEVEL=INFO
-SMTP_HOST=
-SMTP_PORT=587
-SMTP_USER=
-SMTP_PASSWORD=
-SMTP_USE_TLS=true
-SMTP_FROM=
+WTF_CSRF_TIME_LIMIT=3600
 ```
 
 ## Creación de base de datos
@@ -96,21 +91,12 @@ flask run
 
 No hay paso de build: el proyecto usa Flask con templates renderizados en servidor.
 
-## Despliegue en Railway
+## Seguridad operativa
 
-Configurar estas variables en Railway antes de desplegar:
-
-- `SECRET_KEY`: obligatoria en producción.
-- `MYSQL_HOST`, `MYSQL_PORT`, `MYSQL_USER`, `MYSQL_PASSWORD`, `MYSQL_DATABASE`: conexión a la base MySQL ya creada por Railway.
-- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_USE_TLS`, `SMTP_FROM`: opcionales; si no se configuran, el sistema no enviará correos SMTP.
-
-Railway ejecuta el `Procfile`:
-
-```text
-web: python scripts/apply_database.py && gunicorn run:app --bind 0.0.0.0:$PORT
-```
-
-Antes de iniciar Gunicorn, `scripts/apply_database.py` aplica `database/schema.sql`, `database/migrations/20260625_appointment_workflow.sql` y `database/seed.sql` sobre la base configurada. El script omite `CREATE DATABASE` y `USE ...` porque en Railway la base ya existe y el usuario de la app puede no tener permisos para crear bases.
+- En desarrollo, si no definís `SECRET_KEY`, Flask usa una clave temporal para facilitar pruebas locales.
+- En producción (`APP_ENV=production` o `FLASK_ENV=production`), `SECRET_KEY` es obligatoria y la app falla al arrancar si falta.
+- Todos los formularios POST incluyen token CSRF. Si el formulario expira, recargá la página y reenviá la operación.
+- Las cookies de sesión son `HttpOnly`, `SameSite=Lax` y `Secure` cuando el entorno es production.
 
 ## Roles
 
@@ -123,10 +109,8 @@ Antes de iniciar Gunicorn, `scripts/apply_database.py` aplica `database/schema.s
 - Validar disponibilidad del médico antes de programar una cita.
 - No permitir dos citas activas (`PENDIENTE` o `CONFIRMADA`) para el mismo médico, fecha y hora.
 - Cancelar una cita registra motivo y fecha de cancelación.
-- Notificar al paciente envía correo SMTP; solo si el envío es exitoso actualiza `notificado` y `fecha_notificacion`. Si SMTP no está configurado o falla, registra evento de fallo y no marca la cita como notificada.
-- Reprogramar crea una nueva cita, marca la original como `REPROGRAMADA` y registra auditoría en `cita_evento`.
-- El médico puede crear citas de seguimiento para el mismo paciente y el mismo médico desde sus citas activas o atendidas.
-- Los recordatorios automáticos quedan disponibles como función de servicio (`send_pending_reminders`) y evitan duplicados usando `cita.notificado`.
+- Notificar al paciente actualiza `notificado` y `fecha_notificacion`.
+- Reprogramar crea una nueva cita y marca la original como `REPROGRAMADA`.
 - El historial se genera desde una cita existente; `historial_cita` no duplica `id_paciente`.
 
 ## Documentación complementaria
@@ -134,3 +118,7 @@ Antes de iniciar Gunicorn, `scripts/apply_database.py` aplica `database/schema.s
 - `docs/diccionario_datos.md`: tablas, campos y reglas principales.
 - `docs/mapa_endpoints.md`: rutas, método, rol y controlador.
 - `docs/checklist_validacion.md`: guía de validación manual y checklist técnico mínimo.
+- `docs/documentacion_tecnica_entregable.md`: desarrollo del punto 7 de la guía e inventario de entregables.
+- `docs/manual_tecnico.md`: arquitectura, configuración, seguridad, logs, Git y mantenimiento.
+- `docs/manual_usuario.md`: guía operativa por rol.
+- `docs/convenciones_seguridad_git.md`: evidencia de Clean Code, seguridad, manejo de errores y flujo Git.

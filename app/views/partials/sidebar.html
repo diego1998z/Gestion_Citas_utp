@@ -41,7 +41,7 @@
                 Reportes
             </a>
         {% endif %}
-        <form method="post" action="{{ url_for('auth.logout') }}" class="m-0">
+        <form method="post" action="{{ url_for('auth.logout') }}" class="m-0"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="{{ link_base }} {{ link_idle }} w-full border-0 bg-transparent text-left hover:bg-white/[0.13]">
                 <span class="material-symbols-rounded text-[1.35rem]" aria-hidden="true">logout</span>
                 Logout

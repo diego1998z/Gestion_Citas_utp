@@ -7,11 +7,20 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-def _int_env(nombre: str, default: int) -> int:
-    try:
-        return int(os.getenv(nombre, str(default)) or default)
-    except (TypeError, ValueError):
-        return default
+def _is_production() -> bool:
+    environment = os.getenv("APP_ENV") or os.getenv("FLASK_ENV") or "development"
+    return environment.strip().lower() == "production"
+
+
+def _get_secret_key() -> str:
+    secret_key = os.getenv("SECRET_KEY")
+    if secret_key:
+        return secret_key
+
+    if _is_production():
+        raise RuntimeError("SECRET_KEY es obligatoria en entorno production")
+
+    return "dev-secret-key-change-me"
 
 
 @dataclass(frozen=True)
@@ -26,12 +35,10 @@ class DatabaseConfig:
 
 
 class Config:
-    SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key-change-me")
+    SECRET_KEY = _get_secret_key()
     DATABASE = DatabaseConfig()
     LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
-    SMTP_HOST = os.getenv("SMTP_HOST", "")
-    SMTP_PORT = _int_env("SMTP_PORT", 587)
-    SMTP_USER = os.getenv("SMTP_USER", "")
-    SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
-    SMTP_USE_TLS = os.getenv("SMTP_USE_TLS", "true").lower() in {"1", "true", "yes", "on"}
-    SMTP_FROM = os.getenv("SMTP_FROM", "")
+    WTF_CSRF_TIME_LIMIT = int(os.getenv("WTF_CSRF_TIME_LIMIT", "3600"))
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = os.getenv("SESSION_COOKIE_SAMESITE", "Lax")
+    SESSION_COOKIE_SECURE = _is_production()

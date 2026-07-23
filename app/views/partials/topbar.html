@@ -13,7 +13,7 @@
             <span class="material-symbols-rounded text-secondary" aria-hidden="true">account_circle</span>
             {{ current_user.nombre_completo or current_user.username }}
         </span>
-        <form method="post" action="{{ url_for('auth.logout') }}" class="m-0">
+        <form method="post" action="{{ url_for('auth.logout') }}" class="m-0"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="rounded-full border border-outline-variant bg-white px-4 py-2 text-sm font-black text-primary shadow-sm transition hover:border-secondary-container hover:bg-blue-50">Cerrar sesión</button>
         </form>
     </div>

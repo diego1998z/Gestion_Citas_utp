@@ -17,6 +17,8 @@ Este documento guía una revisión manual del MVP sin exponer SQL interno al usu
 - [ ] Confirmar que rutas protegidas redirigen o bloquean cuando no hay sesión.
 - [ ] Confirmar que rutas de administración no están disponibles para roles no autorizados.
 - [ ] Verificar que las contraseñas no aparecen en texto plano en vistas ni documentación operativa.
+- [ ] Enviar un POST sin `csrf_token` y confirmar respuesta 403 amigable.
+- [ ] Confirmar que `SECRET_KEY` está definida antes de usar entorno `production`.
 
 ## Validación MVC
 
@@ -69,7 +71,7 @@ Este documento guía una revisión manual del MVP sin exponer SQL interno al usu
 ## Validación técnica permitida sin build
 
 ```powershell
-python -m py_compile app/models/reporte_model.py app/controllers/reporte_controller.py app/__init__.py
+python -m py_compile app/__init__.py config/settings.py app/controllers/*.py app/models/*.py app/utils/*.py
 git diff --check
 ```
 

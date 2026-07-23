@@ -3,9 +3,14 @@ from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
 from flask import Flask, render_template
+from flask_wtf import CSRFProtect
+from flask_wtf.csrf import CSRFError
 
 from app.utils.auth import get_current_user
 from config.settings import Config
+
+
+csrf = CSRFProtect()
 
 
 def create_app(config_class: type[Config] = Config) -> Flask:
@@ -15,6 +20,8 @@ def create_app(config_class: type[Config] = Config) -> Flask:
         static_folder="static",
     )
     app.config.from_object(config_class)
+
+    csrf.init_app(app)
 
     configure_logging(app)
     register_blueprints(app)
@@ -81,6 +88,11 @@ def register_error_handlers(app: Flask) -> None:
     @app.errorhandler(404)
     def not_found(error):
         return render_template("errors/404.html"), 404
+
+    @app.errorhandler(CSRFError)
+    def csrf_error(error):
+        app.logger.warning("Solicitud POST bloqueada por CSRF: %s", error.description)
+        return render_template("errors/403.html"), 403
 
     @app.errorhandler(500)
     def internal_server_error(error):

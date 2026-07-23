@@ -56,7 +56,7 @@
             {% if current_user %}
                 <div class="flex flex-wrap items-center gap-3 text-sm font-bold text-blue-100">
                     <span>{{ current_user.nombre_completo }} · {{ current_user.rol }}</span>
-                    <form method="post" action="{{ url_for('auth.logout') }}">
+                    <form method="post" action="{{ url_for('auth.logout') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <button type="submit" class="rounded-full border border-white/25 px-4 py-2 text-sm font-black text-white hover:bg-white/10">Cerrar sesión</button>
                     </form>
                 </div>
