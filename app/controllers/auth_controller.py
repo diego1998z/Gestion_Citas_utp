@@ -40,10 +40,17 @@ def login():
             if not credenciales_validas or not es_usuario_activo(usuario):
                 flash("Usuario o contraseña incorrectos.", "error")
             else:
+                rol_usuario = (usuario.get("rol") or "").strip().upper()
+                rol_seleccionado = form_data["rol"]
+
+                if rol_usuario != rol_seleccionado:
+                    flash("Credenciales inválidas para el rol seleccionado.", "error")
+                    return render_template("auth/login.html", form_data=form_data, errors=errors), 401
+
                 session.clear()
                 session["id_usuario"] = usuario["id_usuario"]
                 session["username"] = usuario["username"]
-                session["rol"] = usuario["rol"]
+                session["rol"] = rol_usuario
                 session["nombres"] = usuario["nombres"]
                 session["apellidos"] = usuario["apellidos"]
                 session["nombre_completo"] = f"{usuario['nombres']} {usuario['apellidos']}"

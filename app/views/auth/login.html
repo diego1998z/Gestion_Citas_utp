@@ -64,6 +64,9 @@
                             <span class="role-option__label">Recepcionista</span>
                         </button>
                     </div>
+                    {% if errors and errors.rol %}
+                        <small class="text-sm font-bold text-red-600">{{ errors.rol }}</small>
+                    {% endif %}
 
                     {% with messages = get_flashed_messages(with_categories=true) %}
                         {% if messages %}

@@ -108,6 +108,7 @@ No hay paso de build: el proyecto usa Flask con templates renderizados en servid
 
 - Validar disponibilidad del médico antes de programar una cita.
 - No permitir dos citas activas (`PENDIENTE` o `CONFIRMADA`) para el mismo médico, fecha y hora.
+- Confirmar únicamente citas en estado `PENDIENTE`.
 - Cancelar una cita registra motivo y fecha de cancelación.
 - Notificar al paciente actualiza `notificado` y `fecha_notificacion`.
 - Reprogramar crea una nueva cita y marca la original como `REPROGRAMADA`.

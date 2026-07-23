@@ -383,6 +383,32 @@ class CitaModel:
                 raise ValueError("Solo se pueden cancelar citas pendientes o confirmadas.")
             self._registrar_evento(cursor, id_cita, "CANCELADA", id_usuario_actor=id_usuario_actor, motivo=motivo)
 
+    def confirmar_cita(self, id_cita: int, id_usuario_actor: int | None = None) -> None:
+        with transaction(dictionary=True) as cursor:
+            cita = self._obtener_cita_bloqueada(cursor, id_cita)
+            if not cita:
+                raise ValueError("La cita no existe.")
+
+            estado_actual = cita["estado"]
+            if estado_actual == "CONFIRMADA":
+                raise ValueError("La cita ya está confirmada.")
+            if estado_actual != "PENDIENTE":
+                raise ValueError(f"No se puede confirmar una cita en estado {estado_actual}.")
+
+            cursor.execute(
+                """
+                UPDATE cita
+                SET estado = 'CONFIRMADA'
+                WHERE id_cita = %s
+                  AND estado = 'PENDIENTE'
+                """,
+                (id_cita,),
+            )
+            if cursor.rowcount == 0:
+                raise ValueError("Solo se pueden confirmar citas pendientes.")
+
+            self._registrar_evento(cursor, id_cita, "CONFIRMADA", id_usuario_actor=id_usuario_actor)
+
     def notificar_paciente(self, id_cita: int) -> None:
         self.marcar_notificada(id_cita)
 

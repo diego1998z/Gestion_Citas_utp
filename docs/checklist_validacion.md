@@ -46,6 +46,8 @@ Este documento guía una revisión manual del MVP sin exponer SQL interno al usu
 
 - [ ] Programar cita seleccionando paciente, médico, fecha, hora y motivo.
 - [ ] Intentar programar una segunda cita activa para el mismo médico, fecha y hora; debe bloquearse.
+- [ ] Confirmar una cita `PENDIENTE` desde Administrador o Recepcionista; debe quedar `CONFIRMADA`.
+- [ ] Intentar confirmar una cita `CONFIRMADA`, `CANCELADA`, `ATENDIDA`, `NO_ASISTIO` o `REPROGRAMADA`; debe bloquearse con mensaje claro.
 - [ ] Notificar al paciente y verificar que aparece como notificado.
 - [ ] Cancelar una cita activa registrando motivo de cancelación.
 - [ ] Reprogramar una cita activa; la cita original debe quedar `REPROGRAMADA` y debe crearse una nueva `PENDIENTE`.

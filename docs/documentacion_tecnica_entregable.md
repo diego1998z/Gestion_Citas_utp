@@ -98,6 +98,7 @@ Ejemplo de formato:
 |---|---|---|---|---|
 | GET / POST | `/login` | Público | `auth_controller.login` | Inicio de sesión. |
 | GET | `/pacientes` | `ADMINISTRADOR`, `RECEPCIONISTA` | `paciente_controller.index` | Lista pacientes. |
+| POST | `/citas/<id_cita>/confirmar` | `ADMINISTRADOR`, `RECEPCIONISTA` | `cita_controller.confirmar` | Confirma una cita pendiente. |
 | POST | `/citas/<id_cita>/cancelar` | `ADMINISTRADOR`, `RECEPCIONISTA` | `cita_controller.cancelar` | Cancela una cita con motivo. |
 
 Archivo relacionado: `docs/mapa_endpoints.md`.
@@ -181,6 +182,7 @@ Debe incluir las principales reglas del sistema:
 
 - Validar disponibilidad antes de programar una cita.
 - No permitir dos citas activas para el mismo médico, fecha y hora.
+- Confirmar únicamente citas en estado `PENDIENTE`.
 - Registrar motivo y fecha al cancelar una cita.
 - Registrar notificación del paciente.
 - Reprogramar creando una nueva cita y marcando la original como `REPROGRAMADA`.
@@ -213,6 +215,7 @@ Debe explicar cómo:
 
 - Registrar pacientes.
 - Programar citas.
+- Confirmar citas pendientes.
 - Cancelar citas.
 - Reprogramar citas.
 - Notificar al paciente.

@@ -124,6 +124,22 @@ def cancelar(id_cita: int):
     return redirect(url_for("citas.index"))
 
 
+@citas_bp.post("/citas/<int:id_cita>/confirmar")
+@roles_required("ADMINISTRADOR", "RECEPCIONISTA")
+def confirmar(id_cita: int):
+    try:
+        cita_model.confirmar_cita(id_cita, _obtener_id_usuario_actual())
+    except ValueError as error:
+        flash(str(error), "error")
+    except MySQLError:
+        log_error_tecnico(logger, "Error confirmando cita")
+        flash("No pudimos confirmar la cita. Intentá nuevamente.", "error")
+    else:
+        flash("Cita confirmada correctamente.", "success")
+
+    return redirect(url_for("citas.index"))
+
+
 @citas_bp.post("/citas/<int:id_cita>/notificar")
 @roles_required("ADMINISTRADOR", "RECEPCIONISTA")
 def notificar(id_cita: int):

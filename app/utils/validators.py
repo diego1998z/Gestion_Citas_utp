@@ -17,7 +17,7 @@ ESTADOS_HORARIO = {"DISPONIBLE", "NO_DISPONIBLE"}
 def validar_login_form(form: MultiDict) -> tuple[dict[str, str], dict[str, str]]:
     username = (form.get("username") or "").strip()
     password = form.get("password") or ""
-    rol = _normalizar_texto(form.get("rol")).upper() or "ADMINISTRADOR"
+    rol = _normalizar_texto(form.get("rol")).upper()
 
     datos = {
         "username": username,

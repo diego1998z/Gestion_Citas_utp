@@ -20,6 +20,7 @@ Las rutas protegidas usan sesión Flask. Los roles se validan en controladores c
 | GET | `/medicos/<id_medico>/disponibilidad` | `ADMINISTRADOR` | `medico_controller.disponibilidad` | Devuelve disponibilidad del médico en JSON. |
 | GET | `/citas` | `ADMINISTRADOR`, `RECEPCIONISTA`, `MEDICO` | `cita_controller.index` | Lista citas y acciones según rol. |
 | GET / POST | `/citas/programar` | `ADMINISTRADOR`, `RECEPCIONISTA` | `cita_controller.programar` | Programa una cita validando disponibilidad. |
+| POST | `/citas/<id_cita>/confirmar` | `ADMINISTRADOR`, `RECEPCIONISTA` | `cita_controller.confirmar` | Confirma únicamente citas pendientes. |
 | POST | `/citas/<id_cita>/cancelar` | `ADMINISTRADOR`, `RECEPCIONISTA` | `cita_controller.cancelar` | Cancela cita con motivo. |
 | POST | `/citas/<id_cita>/notificar` | `ADMINISTRADOR`, `RECEPCIONISTA` | `cita_controller.notificar` | Envía correo y marca cita como notificada solo si el envío es exitoso. |
 | GET / POST | `/citas/<id_cita>/reprogramar` | `ADMINISTRADOR`, `RECEPCIONISTA` | `cita_controller.reprogramar` | Crea nueva cita y marca la original como reprogramada. |

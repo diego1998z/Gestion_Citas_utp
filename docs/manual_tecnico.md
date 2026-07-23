@@ -2,7 +2,7 @@
 
 ## 1. Propósito
 
-Sistema web MVC para gestionar citas médicas de la Clínica Universitaria de Comas. Cubre pacientes, médicos, especialidades, horarios, citas, reprogramación, cancelación, notificación, historial clínico básico y reportes administrativos.
+Sistema web MVC para gestionar citas médicas de la Clínica Universitaria de Comas. Cubre pacientes, médicos, especialidades, horarios, citas, confirmación, reprogramación, cancelación, notificación, historial clínico básico y reportes administrativos.
 
 ## 2. Stack y arquitectura
 
@@ -54,6 +54,7 @@ Regla de seguridad: si `APP_ENV=production` o `FLASK_ENV=production`, la aplicac
 - Autenticación por sesión Flask.
 - Hashing de contraseñas con Werkzeug.
 - Autorización por roles (`ADMINISTRADOR`, `RECEPCIONISTA`, `MEDICO`).
+- En login, el rol enviado por el formulario se normaliza, se valida contra roles permitidos y debe coincidir con el rol real del usuario autenticado antes de crear la sesión.
 - Consultas SQL parametrizadas para prevenir inyección SQL.
 - Validación server-side de formularios antes de llamar al modelo.
 - Escape automático de Jinja para reducir riesgo de XSS en vistas.

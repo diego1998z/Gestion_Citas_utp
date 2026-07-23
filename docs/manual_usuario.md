@@ -7,7 +7,7 @@
 3. Ingresar usuario y contraseña.
 4. Presionar **Ingresar**.
 
-Si las credenciales son incorrectas, el sistema mostrará un mensaje amigable y permitirá intentar nuevamente.
+Si las credenciales, el estado del usuario o el rol seleccionado no coinciden, el sistema mostrará un mensaje amigable y permitirá intentar nuevamente.
 
 ## 2. Administrador
 
@@ -69,6 +69,14 @@ La recepcionista opera el flujo diario de atención administrativa.
 5. Guardar.
 
 El sistema valida disponibilidad del médico y bloquea dos citas activas para el mismo médico, fecha y hora.
+
+### Confirmar una cita
+
+1. Entrar a **Citas**.
+2. Buscar una cita en estado `PENDIENTE`.
+3. Presionar **Confirmar**.
+
+El sistema cambia la cita a `CONFIRMADA`. Si la cita ya estaba confirmada o tiene un estado final como `CANCELADA`, `ATENDIDA`, `NO_ASISTIO` o `REPROGRAMADA`, muestra un mensaje claro y no modifica el registro.
 
 ### Cancelar una cita
 
