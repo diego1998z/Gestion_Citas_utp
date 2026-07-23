@@ -526,6 +526,268 @@ WHERE p.dni = '90000001'
       WHERE hc.id_cita = c.id_cita
   );
 
+INSERT INTO usuario_sistema (
+    username,
+    password_hash,
+    rol,
+    estado,
+    nombres,
+    apellidos,
+    email
+)
+VALUES (
+    'elena.villanueva',
+    'pbkdf2:sha256:1000000$demo_medico_salt$66f30174d0d6605ff86c30e50dec01f5d00a43a0a119e59be4fe56ddf2b8181d',
+    'MEDICO',
+    'ACTIVO',
+    'Elena Pilar',
+    'Villanueva Soto',
+    'elena.villanueva.soto@demo-clinic.test'
+)
+ON DUPLICATE KEY UPDATE
+    password_hash = VALUES(password_hash),
+    rol = VALUES(rol),
+    estado = VALUES(estado),
+    nombres = VALUES(nombres),
+    apellidos = VALUES(apellidos),
+    email = VALUES(email);
+
+INSERT INTO medico (id_usuario, id_especialidad, numero_colegiatura)
+SELECT
+    usuario_sistema.id_usuario,
+    especialidad.id_especialidad,
+    'CMP-604218'
+FROM usuario_sistema
+INNER JOIN especialidad
+    ON especialidad.nombre = 'Ginecologia'
+WHERE usuario_sistema.username = 'elena.villanueva'
+ON DUPLICATE KEY UPDATE
+    id_especialidad = VALUES(id_especialidad),
+    numero_colegiatura = VALUES(numero_colegiatura);
+
+INSERT INTO horario (id_medico, fecha, hora_inicio, hora_fin, estado)
+SELECT m.id_medico, '2026-06-27', '08:00:00', '12:00:00', 'DISPONIBLE'
+FROM medico m
+INNER JOIN usuario_sistema u ON u.id_usuario = m.id_usuario
+WHERE u.username = 'elena.villanueva'
+ON DUPLICATE KEY UPDATE estado = VALUES(estado);
+
+INSERT INTO horario (id_medico, fecha, hora_inicio, hora_fin, estado)
+SELECT m.id_medico, '2026-06-27', '14:00:00', '18:00:00', 'NO_DISPONIBLE'
+FROM medico m
+INNER JOIN usuario_sistema u ON u.id_usuario = m.id_usuario
+WHERE u.username = 'medico'
+ON DUPLICATE KEY UPDATE estado = VALUES(estado);
+
+INSERT INTO cita (
+    id_paciente,
+    id_medico,
+    id_recepcionista,
+    fecha,
+    hora,
+    estado,
+    motivo_consulta,
+    motivo_cancelacion,
+    fecha_cancelacion,
+    notificado,
+    fecha_notificacion
+)
+SELECT
+    p.id_paciente,
+    m.id_medico,
+    r.id_recepcionista,
+    '2026-06-27',
+    '08:30:00',
+    'CANCELADA',
+    'Consulta por dolor lumbar',
+    'Paciente solicita cancelar por cruce de horarios',
+    '2026-06-26 17:45:00',
+    TRUE,
+    '2026-06-26 09:10:00'
+FROM paciente p
+INNER JOIN usuario_sistema um ON um.username = 'rosa.condori'
+INNER JOIN medico m ON m.id_usuario = um.id_usuario
+LEFT JOIN usuario_sistema ur ON ur.username = 'recepcionista'
+LEFT JOIN recepcionista r ON r.id_usuario = ur.id_usuario
+WHERE p.dni = '90000002'
+  AND NOT EXISTS (
+      SELECT 1
+      FROM cita c
+      WHERE c.id_paciente = p.id_paciente
+        AND c.id_medico = m.id_medico
+        AND c.fecha = '2026-06-27'
+        AND c.hora = '08:30:00'
+  );
+
+INSERT INTO cita_evento (id_cita, id_usuario_actor, tipo_evento, motivo, detalle)
+SELECT
+    c.id_cita,
+    ur.id_usuario,
+    'CANCELADA',
+    c.motivo_cancelacion,
+    'Cita demo cancelada por solicitud del paciente.'
+FROM cita c
+INNER JOIN paciente p ON p.id_paciente = c.id_paciente
+INNER JOIN usuario_sistema ur ON ur.username = 'recepcionista'
+WHERE p.dni = '90000002'
+  AND c.fecha = '2026-06-27'
+  AND c.hora = '08:30:00'
+  AND NOT EXISTS (
+      SELECT 1
+      FROM cita_evento ce
+      WHERE ce.id_cita = c.id_cita
+        AND ce.tipo_evento = 'CANCELADA'
+  );
+
+INSERT INTO cita (
+    id_paciente,
+    id_medico,
+    id_recepcionista,
+    fecha,
+    hora,
+    estado,
+    motivo_consulta,
+    notificado,
+    fecha_notificacion
+)
+SELECT
+    p.id_paciente,
+    m.id_medico,
+    r.id_recepcionista,
+    '2026-06-27',
+    '10:00:00',
+    'REPROGRAMADA',
+    'Control ginecologico preventivo',
+    TRUE,
+    '2026-06-26 10:00:00'
+FROM paciente p
+INNER JOIN usuario_sistema um ON um.username = 'elena.villanueva'
+INNER JOIN medico m ON m.id_usuario = um.id_usuario
+LEFT JOIN usuario_sistema ur ON ur.username = 'recepcionista'
+LEFT JOIN recepcionista r ON r.id_usuario = ur.id_usuario
+WHERE p.dni = '90000005'
+  AND NOT EXISTS (
+      SELECT 1
+      FROM cita c
+      WHERE c.id_paciente = p.id_paciente
+        AND c.id_medico = m.id_medico
+        AND c.fecha = '2026-06-27'
+        AND c.hora = '10:00:00'
+  );
+
+INSERT INTO cita (
+    id_paciente,
+    id_medico,
+    id_recepcionista,
+    id_cita_origen,
+    fecha,
+    hora,
+    estado,
+    motivo_consulta,
+    notificado,
+    fecha_notificacion
+)
+SELECT
+    p.id_paciente,
+    m.id_medico,
+    r.id_recepcionista,
+    origen.id_cita,
+    '2026-06-28',
+    '11:00:00',
+    'CONFIRMADA',
+    'Control ginecologico preventivo reprogramado',
+    TRUE,
+    '2026-06-27 12:30:00'
+FROM paciente p
+INNER JOIN usuario_sistema um ON um.username = 'elena.villanueva'
+INNER JOIN medico m ON m.id_usuario = um.id_usuario
+LEFT JOIN usuario_sistema ur ON ur.username = 'recepcionista'
+LEFT JOIN recepcionista r ON r.id_usuario = ur.id_usuario
+INNER JOIN cita origen
+    ON origen.id_paciente = p.id_paciente
+    AND origen.id_medico = m.id_medico
+    AND origen.fecha = '2026-06-27'
+    AND origen.hora = '10:00:00'
+WHERE p.dni = '90000005'
+  AND NOT EXISTS (
+      SELECT 1
+      FROM cita c
+      WHERE c.id_paciente = p.id_paciente
+        AND c.id_medico = m.id_medico
+        AND c.fecha = '2026-06-28'
+        AND c.hora = '11:00:00'
+  );
+
+INSERT INTO cita_evento (
+    id_cita,
+    id_usuario_actor,
+    id_cita_relacionada,
+    tipo_evento,
+    fecha_anterior,
+    hora_anterior,
+    fecha_nueva,
+    hora_nueva,
+    motivo,
+    detalle
+)
+SELECT
+    origen.id_cita,
+    ur.id_usuario,
+    nueva.id_cita,
+    'REPROGRAMADA',
+    origen.fecha,
+    origen.hora,
+    nueva.fecha,
+    nueva.hora,
+    'Paciente solicita nueva fecha',
+    'Cita demo reprogramada con nueva cita confirmada.'
+FROM cita origen
+INNER JOIN paciente p ON p.id_paciente = origen.id_paciente
+INNER JOIN usuario_sistema um ON um.username = 'elena.villanueva'
+INNER JOIN medico m ON m.id_usuario = um.id_usuario AND m.id_medico = origen.id_medico
+INNER JOIN usuario_sistema ur ON ur.username = 'recepcionista'
+INNER JOIN cita nueva
+    ON nueva.id_cita_origen = origen.id_cita
+    AND nueva.fecha = '2026-06-28'
+    AND nueva.hora = '11:00:00'
+WHERE p.dni = '90000005'
+  AND origen.fecha = '2026-06-27'
+  AND origen.hora = '10:00:00'
+  AND NOT EXISTS (
+      SELECT 1
+      FROM cita_evento ce
+      WHERE ce.id_cita = origen.id_cita
+        AND ce.tipo_evento = 'REPROGRAMADA'
+  );
+
+INSERT INTO historial_cita (
+    id_cita,
+    diagnostico,
+    tratamiento,
+    observaciones,
+    fecha_atencion
+)
+SELECT
+    c.id_cita,
+    'Inasistencia a cita programada',
+    'Se recomienda contactar al paciente para reprogramar si persiste la necesidad de atencion',
+    'Registro demo de no asistencia sin evaluacion clinica presencial.',
+    '2026-06-24 15:20:00'
+FROM cita c
+INNER JOIN paciente p ON p.id_paciente = c.id_paciente
+INNER JOIN medico m ON m.id_medico = c.id_medico
+INNER JOIN usuario_sistema um ON um.id_usuario = m.id_usuario
+WHERE p.dni = '90000006'
+  AND um.username = 'miguel.torres'
+  AND c.fecha = '2026-06-24'
+  AND c.hora = '15:00:00'
+  AND c.estado = 'NO_ASISTIO'
+  AND NOT EXISTS (
+      SELECT 1
+      FROM historial_cita hc
+      WHERE hc.id_cita = c.id_cita
+  );
+
 INSERT INTO horario (id_medico, fecha, hora_inicio, hora_fin, estado)
 SELECT m.id_medico, '2026-06-25', '08:00:00', '12:00:00', 'DISPONIBLE'
 FROM medico m
@@ -674,6 +936,34 @@ WHERE p.dni = '90000003'
   AND um.username = 'rosa.condori'
   AND c.fecha = '2026-05-22'
   AND c.hora = '15:30:00'
+  AND NOT EXISTS (
+      SELECT 1
+      FROM historial_cita hc
+      WHERE hc.id_cita = c.id_cita
+  );
+
+INSERT INTO historial_cita (
+    id_cita,
+    diagnostico,
+    tratamiento,
+    observaciones,
+    fecha_atencion
+)
+SELECT
+    c.id_cita,
+    'Inasistencia a cita programada',
+    'Se recomienda contactar al paciente para reprogramar si persiste la necesidad de atencion',
+    'Registro demo de no asistencia sin evaluacion clinica presencial.',
+    '2026-06-24 15:20:00'
+FROM cita c
+INNER JOIN paciente p ON p.id_paciente = c.id_paciente
+INNER JOIN medico m ON m.id_medico = c.id_medico
+INNER JOIN usuario_sistema um ON um.id_usuario = m.id_usuario
+WHERE p.dni = '90000006'
+  AND um.username = 'miguel.torres'
+  AND c.fecha = '2026-06-24'
+  AND c.hora = '15:00:00'
+  AND c.estado = 'NO_ASISTIO'
   AND NOT EXISTS (
       SELECT 1
       FROM historial_cita hc
