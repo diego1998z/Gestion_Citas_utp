@@ -9,7 +9,7 @@ from app.models.historial_cita_model import HistorialCitaModel
 from app.models.horario_model import HorarioModel
 from app.models.medico_model import MedicoModel
 from app.models.paciente_model import PacienteModel
-from app.services.mail_service import MailConfigurationError, send_appointment_notification
+from app.services.mail_service import MailConfigurationError, MailDeliveryError, send_appointment_notification
 from app.utils.auth import get_current_user, roles_required
 from app.utils.logger import get_logger, log_error_tecnico
 from app.utils.validators import (
@@ -159,10 +159,10 @@ def notificar(id_cita: int):
         except MySQLError:
             log_error_tecnico(logger, "Error registrando fallo de notificación")
         flash(str(error), "error")
-    except (OSError, smtplib.SMTPException) as error:
+    except (MailDeliveryError, OSError, smtplib.SMTPException) as error:
         log_error_tecnico(logger, "Error enviando correo de notificación")
         try:
-            cita_model.registrar_notificacion_fallida(id_cita, "No se pudo enviar el correo SMTP.", _obtener_id_usuario_actual())
+            cita_model.registrar_notificacion_fallida(id_cita, "No se pudo enviar el correo.", _obtener_id_usuario_actual())
         except MySQLError:
             log_error_tecnico(logger, "Error registrando fallo de notificación")
         flash("No pudimos enviar el correo al paciente. La cita no fue marcada como notificada.", "error")

@@ -47,7 +47,7 @@ pip install -r requirements.txt
 Copy-Item .env.example config/.env
 ```
 
-4. Editar `config/.env` con tus credenciales MySQL y SMTP:
+4. Editar `config/.env` con tus credenciales MySQL y correo:
 
 ```env
 FLASK_APP=run.py
@@ -61,12 +61,18 @@ MYSQL_DATABASE=gestion_citas_medicas
 LOG_LEVEL=INFO
 WTF_CSRF_TIME_LIMIT=3600
 
+EMAIL_PROVIDER=smtp
+
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USE_TLS=true
 SMTP_USER=tu-correo@gmail.com
 SMTP_PASSWORD=tu-app-password
 SMTP_FROM=tu-correo@gmail.com
+
+BREVO_API_KEY=
+BREVO_FROM_EMAIL=tu-remitente-verificado@example.com
+BREVO_FROM_NAME=Clínica Universitaria de Comas
 ```
 
 ## Creación de base de datos
@@ -112,6 +118,25 @@ No hay paso de build: el proyecto usa Flask con templates renderizados en servid
 - Todos los formularios POST incluyen token CSRF. Si el formulario expira, recargá la página y reenviá la operación.
 - Las cookies de sesión son `HttpOnly`, `SameSite=Lax` y `Secure` cuando el entorno es production.
 
+
+## Notificaciones por correo
+
+El sistema soporta dos proveedores configurables:
+
+- `EMAIL_PROVIDER=smtp`: opción local/fallback usando SMTP, por ejemplo Gmail con App Password.
+- `EMAIL_PROVIDER=brevo`: opción recomendada para Railway/producción usando API HTTPS de Brevo.
+
+Variables Brevo para Railway:
+
+```env
+EMAIL_PROVIDER=brevo
+BREVO_API_KEY=tu-api-key-de-brevo
+BREVO_FROM_EMAIL=correo-remitente-verificado@dominio.com
+BREVO_FROM_NAME=Clínica Universitaria de Comas
+```
+
+No subir claves reales al repositorio. Configurarlas en Railway desde el panel de variables del servicio web.
+
 ## Roles
 
 - `ADMINISTRADOR`: acceso a pacientes, médicos, especialidades, horarios, citas, historial y reportes.
@@ -124,7 +149,7 @@ No hay paso de build: el proyecto usa Flask con templates renderizados en servid
 - No permitir dos citas activas (`PENDIENTE` o `CONFIRMADA`) para el mismo médico, fecha y hora.
 - Confirmar únicamente citas en estado `PENDIENTE`.
 - Cancelar una cita registra motivo y fecha de cancelación.
-- Notificar al paciente envía correo por SMTP y, si el envío fue exitoso, actualiza `notificado` y `fecha_notificacion`. Para Gmail, configurá `SMTP_USER`, `SMTP_PASSWORD` con una App Password y `SMTP_FROM` en `config/.env`.
+- Notificar al paciente envía correo mediante el proveedor configurado en `EMAIL_PROVIDER` y, si el envío fue exitoso, actualiza `notificado` y `fecha_notificacion`. En local se puede usar `EMAIL_PROVIDER=smtp` con Gmail y App Password. En Railway se recomienda `EMAIL_PROVIDER=brevo` con API HTTPS porque el SMTP saliente puede estar restringido.
 - Reprogramar crea una nueva cita y marca la original como `REPROGRAMADA`.
 - El historial se genera desde una cita existente; `historial_cita` no duplica `id_paciente`.
 

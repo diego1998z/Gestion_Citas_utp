@@ -96,7 +96,7 @@ La cita original queda como `REPROGRAMADA` y se crea una nueva cita pendiente.
 
 ### Notificar al paciente
 
-Antes de usar esta opción, el administrador técnico debe configurar SMTP en `config/.env`. Para Gmail se usa una App Password como contraseña SMTP, no la contraseña normal de la cuenta.
+Antes de usar esta opción, el administrador técnico debe configurar el proveedor de correo. En local puede usarse SMTP con Gmail y App Password. En Railway se recomienda Brevo por API HTTPS configurando `EMAIL_PROVIDER=brevo` y las variables de Brevo en el panel de Railway.
 
 1. Entrar a **Citas**.
 2. Buscar una cita no notificada.

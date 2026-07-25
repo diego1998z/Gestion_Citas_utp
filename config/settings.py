@@ -52,12 +52,17 @@ class Config:
     DATABASE = DatabaseConfig()
     LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
     WTF_CSRF_TIME_LIMIT = int(os.getenv("WTF_CSRF_TIME_LIMIT", "3600"))
+    EMAIL_PROVIDER = os.getenv("EMAIL_PROVIDER", "smtp").strip().lower()
     SMTP_HOST = os.getenv("SMTP_HOST", "smtp.gmail.com")
     SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
     SMTP_USE_TLS = _get_bool_env("SMTP_USE_TLS", True)
     SMTP_USER = os.getenv("SMTP_USER", "")
     SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
     SMTP_FROM = os.getenv("SMTP_FROM") or SMTP_USER
+    BREVO_API_URL = os.getenv("BREVO_API_URL", "https://api.brevo.com/v3/smtp/email")
+    BREVO_API_KEY = os.getenv("BREVO_API_KEY", "")
+    BREVO_FROM_EMAIL = os.getenv("BREVO_FROM_EMAIL") or SMTP_FROM
+    BREVO_FROM_NAME = os.getenv("BREVO_FROM_NAME", "Clínica Universitaria de Comas")
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = os.getenv("SESSION_COOKIE_SAMESITE", "Lax")
     SESSION_COOKIE_SECURE = _is_production()

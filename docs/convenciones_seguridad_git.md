@@ -19,8 +19,8 @@
 - Proteger rutas por rol.
 - Proteger formularios POST con CSRF.
 - Definir `SECRET_KEY` segura en producción.
-- No versionar `.env` ni logs.
-- Mostrar mensajes amigables y registrar detalle técnico en logs.
+- No versionar `.env`, API keys de Brevo, credenciales SMTP ni logs.
+- Mostrar mensajes amigables y registrar detalle técnico en logs. Los errores de correo deben registrarse sin exponer API keys ni contraseñas.
 
 ## Manejo de errores y logs
 

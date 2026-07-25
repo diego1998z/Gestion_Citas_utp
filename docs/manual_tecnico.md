@@ -37,16 +37,20 @@ Variables principales:
 | `MYSQL_DATABASE` | Base `gestion_citas_medicas`. | Sí |
 | `LOG_LEVEL` | Nivel de logging. | No |
 | `WTF_CSRF_TIME_LIMIT` | Vigencia del token CSRF en segundos. | No |
-| `SMTP_HOST` | Servidor SMTP. Por defecto `smtp.gmail.com`. | Sí, si se usan notificaciones |
-| `SMTP_PORT` | Puerto SMTP entero. Por defecto `587`. | Sí, si se usan notificaciones |
-| `SMTP_USE_TLS` | Activa STARTTLS (`true/false`, `1/0`, `yes/no`, `on/off`). Por defecto `true`. | Sí, si se usan notificaciones |
-| `SMTP_USER` | Usuario/correo autenticado del remitente. | Sí, si el SMTP autentica |
-| `SMTP_PASSWORD` | Password SMTP. En Gmail debe ser una App Password, no la contraseña normal. | Sí, si el SMTP autentica |
-| `SMTP_FROM` | Remitente visible. Si no se define, usa `SMTP_USER`. | Sí, si se usan notificaciones |
+| `EMAIL_PROVIDER` | Proveedor de correo: `smtp` o `brevo`. Por defecto `smtp`. | Sí, si se usan notificaciones |
+| `SMTP_HOST` | Servidor SMTP. Por defecto `smtp.gmail.com`. | Sí, si `EMAIL_PROVIDER=smtp` |
+| `SMTP_PORT` | Puerto SMTP entero. Por defecto `587`. | Sí, si `EMAIL_PROVIDER=smtp` |
+| `SMTP_USE_TLS` | Activa STARTTLS (`true/false`, `1/0`, `yes/no`, `on/off`). Por defecto `true`. | Sí, si `EMAIL_PROVIDER=smtp` |
+| `SMTP_USER` | Usuario/correo autenticado del remitente. | Sí, si `EMAIL_PROVIDER=smtp` y el SMTP autentica |
+| `SMTP_PASSWORD` | Password SMTP. En Gmail debe ser una App Password, no la contraseña normal. | Sí, si `EMAIL_PROVIDER=smtp` y el SMTP autentica |
+| `SMTP_FROM` | Remitente visible para SMTP. Si no se define, usa `SMTP_USER`. | Sí, si `EMAIL_PROVIDER=smtp` |
+| `BREVO_API_KEY` | API key de Brevo para envío por HTTPS. | Sí, si `EMAIL_PROVIDER=brevo` |
+| `BREVO_FROM_EMAIL` | Correo remitente verificado en Brevo. | Sí, si `EMAIL_PROVIDER=brevo` |
+| `BREVO_FROM_NAME` | Nombre visible del remitente. | No |
 
 Regla de seguridad: si `APP_ENV=production` o `FLASK_ENV=production`, la aplicación no debe arrancar sin `SECRET_KEY` explícita. En desarrollo se mantiene una clave temporal para facilitar ejecución local. La configuración se puede cargar desde `.env` y desde `config/.env`; `config/.env` tiene precedencia para permitir ajustes locales del proyecto sin tocar secretos reales.
 
-Para notificaciones por correo, el servicio usa SMTP. Con Gmail, crear una App Password en la cuenta de Google y colocarla en `SMTP_PASSWORD`; no usar ni versionar la contraseña normal de la cuenta.
+Para notificaciones por correo, el servicio soporta SMTP y Brevo API HTTPS. En local se puede usar SMTP con Gmail creando una App Password y colocándola en `SMTP_PASSWORD`. En Railway se recomienda Brevo (`EMAIL_PROVIDER=brevo`) porque las conexiones SMTP salientes a puertos como 587 pueden estar restringidas. Las claves reales deben configurarse como variables de entorno del servicio y no versionarse.
 
 ## 4. Base de datos
 
