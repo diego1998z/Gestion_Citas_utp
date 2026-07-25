@@ -1,304 +1,76 @@
 # Documentación técnica entregable
 
-Este documento desarrolla el punto 7 de la guía de codificación del sistema. Su objetivo es inventariar los documentos, archivos y evidencias entregados para considerar aceptado el sistema o cada módulo funcional.
+Este documento corresponde al inventario real de la documentación técnica entregada para el Sistema de Gestión de Citas Médicas de la Clínica Universitaria de Comas. Su finalidad es dejar evidencia de qué documentos acompañan al proyecto, qué archivo los contiene, qué información cubren y cuál es su estado al momento de la entrega.
 
-## 1. Objetivo del entregable
+## 1. Objetivo
 
-La documentación técnica entregable permite que el sistema pueda ser instalado, revisado, mantenido y evaluado por otra persona sin depender únicamente del equipo desarrollador.
+El objetivo de esta documentación técnica entregable es facilitar la revisión, instalación, mantenimiento y validación del sistema por parte de un evaluador, docente o futuro desarrollador.
 
-Para el Sistema de Gestión de Citas Médicas, la documentación debe demostrar:
+La documentación entregada permite verificar:
 
-- Cómo está construido el sistema.
-- Cómo se instala y ejecuta.
-- Cómo está diseñada la base de datos.
-- Qué rutas o endpoints existen.
-- Qué roles pueden usar cada funcionalidad.
-- Qué reglas de negocio se aplican.
-- Qué validaciones se realizaron antes de la entrega.
+- Cómo se instala y ejecuta el sistema.
+- Cómo está organizada la arquitectura MVC.
+- Cómo está diseñada la base de datos MySQL.
+- Qué rutas y módulos existen en la aplicación.
+- Qué reglas de seguridad, validación y manejo de errores se aplican.
+- Qué pruebas y criterios de validación fueron considerados.
+- Qué convenciones de codificación, seguridad y Git se usaron en el proyecto.
 
-## 2. Inventario de documentos entregados
+## 2. Inventario real de documentación entregada
 
-| Entregable | Archivo entregado | Estado actual | Propósito |
+| Entregable | Archivo entregado | Descripción real | Estado |
 |---|---|---|---|
-| README de instalación | `README.md` | Entregado | Explicar requisitos, configuración, base de datos, usuarios demo y ejecución local. |
-| Diccionario de datos | `docs/diccionario_datos.md` | Entregado | Documentar tablas, campos, tipos de datos, claves primarias, claves foráneas y reglas. |
-| Mapa de endpoints | `docs/mapa_endpoints.md` | Entregado | Listar rutas, métodos HTTP, roles autorizados y controladores. |
-| Checklist de validación | `docs/checklist_validacion.md` | Entregado | Guiar pruebas manuales y revisión técnica mínima antes de entregar. |
-| Manual técnico | `docs/manual_tecnico.md` | Entregado | Explicar arquitectura, flujo interno, configuración, seguridad, logs y mantenimiento. |
-| Manual de usuario | `docs/manual_usuario.md` | Entregado | Explicar el uso del sistema por rol con pasos claros. |
-| Convenciones, seguridad y Git | `docs/convenciones_seguridad_git.md` | Entregado | Resumir estándares de codificación, seguridad, manejo de errores y flujo Git. |
-
-## 3. README de instalación
-
-El README debe ser el primer documento que revise una persona externa al proyecto.
-
-Debe incluir:
-
-1. Nombre del sistema.
-2. Objetivo general.
-3. Stack tecnológico.
-4. Estructura de carpetas.
-5. Requisitos previos.
-6. Instalación de dependencias.
-7. Configuración del archivo `.env`.
-8. Creación de la base de datos.
-9. Ejecución de scripts SQL.
-10. Usuarios de prueba.
-11. Comando para iniciar la aplicación.
-12. Reglas de negocio principales.
-
-Archivo relacionado: `README.md`.
-
-## 4. Diccionario de datos
-
-El diccionario de datos debe documentar la estructura de la base de datos `gestion_citas_medicas`.
-
-Debe incluir por cada tabla:
-
-- Nombre de la tabla.
-- Descripción funcional.
-- Campos.
-- Tipo de dato.
-- Si el campo permite `NULL`.
-- Clave primaria.
-- Claves foráneas.
-- Restricciones `UNIQUE`.
-- Campos de auditoría.
-- Estados permitidos cuando se use `ENUM`.
-
-Tablas mínimas documentadas:
-
-- `usuario_sistema`
-- `administrador`
-- `recepcionista`
-- `medico`
-- `especialidad`
-- `horario`
-- `paciente`
-- `cita`
-- `historial_cita`
-- `cita_evento`
-
-Archivo relacionado: `docs/diccionario_datos.md`.
-
-## 5. Mapa de endpoints
-
-El mapa de endpoints debe permitir revisar rápidamente qué rutas existen y qué función cumple cada una.
-
-Debe incluir:
-
-- Método HTTP.
-- Ruta.
-- Rol requerido.
-- Controlador responsable.
-- Descripción de la acción.
-- Si la ruta renderiza una vista o devuelve JSON.
-
-Ejemplo de formato:
-
-| Método | Ruta | Rol requerido | Controlador | Descripción |
-|---|---|---|---|---|
-| GET / POST | `/login` | Público | `auth_controller.login` | Inicio de sesión. |
-| GET | `/pacientes` | `ADMINISTRADOR`, `RECEPCIONISTA` | `paciente_controller.index` | Lista pacientes. |
-| POST | `/citas/<id_cita>/confirmar` | `ADMINISTRADOR`, `RECEPCIONISTA` | `cita_controller.confirmar` | Confirma una cita pendiente. |
-| POST | `/citas/<id_cita>/cancelar` | `ADMINISTRADOR`, `RECEPCIONISTA` | `cita_controller.cancelar` | Cancela una cita con motivo. |
-
-Archivo relacionado: `docs/mapa_endpoints.md`.
-
-## 6. Manual técnico
-
-El manual técnico está orientado al profesor, evaluador o futuro desarrollador que deba entender cómo funciona internamente el sistema.
-
-Debe incluir:
-
-### 6.1 Arquitectura
-
-- Patrón MVC utilizado.
-- Responsabilidad de modelos, controladores y vistas.
-- Uso de Blueprints de Flask.
-- Regla principal: las vistas no acceden directamente a la base de datos.
-
-### 6.2 Estructura del proyecto
-
-Debe explicar la función de las carpetas principales:
-
-```text
-app/
-  models/
-  controllers/
-  views/
-  static/
-  utils/
-config/
-database/
-docs/
-logs/
-run.py
-```
-
-### 6.3 Configuración
-
-Debe explicar:
-
-- Variables de entorno usadas.
-- Conexión a MySQL.
-- Archivo `.env`.
-- Archivo `.env.example`.
-- Configuración de logs.
-
-### 6.4 Persistencia
-
-Debe explicar:
-
-- Uso de MySQL.
-- Motor InnoDB.
-- Uso de claves foráneas.
-- Uso de transacciones.
-- Consultas parametrizadas.
-- Scripts `database/schema.sql` y `database/seed.sql`.
-
-### 6.5 Seguridad
-
-Debe documentar:
-
-- Autenticación por sesión.
-- Hashing de contraseñas con Werkzeug.
-- Control de acceso por roles.
-- Validación de formularios.
-- Prevención de inyección SQL mediante parámetros.
-- Prevención básica de XSS mediante escape automático de Jinja.
-- Manejo de redirecciones internas seguras.
-
-### 6.6 Manejo de errores y logs
-
-Debe explicar:
-
-- Uso de `try-except` en operaciones críticas.
-- Mensajes amigables para el usuario.
-- Registro técnico en `logs/app.log`.
-- Manejadores globales para errores `403`, `404` y `500`.
-
-### 6.7 Reglas de negocio
-
-Debe incluir las principales reglas del sistema:
-
-- Validar disponibilidad antes de programar una cita.
-- No permitir dos citas activas para el mismo médico, fecha y hora.
-- Confirmar únicamente citas en estado `PENDIENTE`.
-- Registrar motivo y fecha al cancelar una cita.
-- Registrar notificación del paciente.
-- Reprogramar creando una nueva cita y marcando la original como `REPROGRAMADA`.
-- Crear historial solamente desde una cita existente.
-
-Archivo relacionado: `docs/manual_tecnico.md`.
-
-## 7. Manual de usuario
-
-El manual de usuario debe estar escrito para una persona que utilizará el sistema, no para un desarrollador.
-
-Debe organizarse por rol:
-
-### 7.1 Administrador
-
-Debe explicar cómo:
-
-- Iniciar sesión.
-- Gestionar pacientes.
-- Gestionar médicos.
-- Gestionar especialidades.
-- Registrar horarios.
-- Revisar citas.
-- Consultar historial.
-- Revisar reportes.
-
-### 7.2 Recepcionista
-
-Debe explicar cómo:
-
-- Registrar pacientes.
-- Programar citas.
-- Confirmar citas pendientes.
-- Cancelar citas.
-- Reprogramar citas.
-- Notificar al paciente.
-- Consultar historial.
-
-### 7.3 Médico
-
-Debe explicar cómo:
-
-- Consultar sus citas.
-- Marcar una cita como atendida.
-- Registrar observaciones clínicas.
-- Marcar una cita como no asistida.
-- Consultar historial de atención.
-
-### 7.4 Capturas recomendadas
-
-El manual de usuario debería incluir capturas de:
-
-- Login.
-- Panel principal.
-- Listado de pacientes.
-- Formulario de paciente.
-- Listado de médicos.
-- Gestión de horarios.
-- Programación de cita.
-- Reprogramación de cita.
-- Historial de cita.
-- Reporte de citas.
-
-Archivo relacionado: `docs/manual_usuario.md`.
-
-## 8. Checklist de validación
-
-Antes de entregar el proyecto, se debe ejecutar una revisión manual usando el checklist.
-
-Debe validar:
-
-- Instalación.
-- Base de datos.
-- Seguridad.
-- Separación MVC.
-- Flujo de pacientes.
-- Flujo de médicos.
-- Flujo de horarios.
-- Flujo de citas.
-- Flujo de historial.
-- Reporte básico de citas.
-- Trazabilidad de eventos de cita.
-- Manejo de errores.
-
-Archivo relacionado: `docs/checklist_validacion.md`.
-
-## 9. Criterios de aceptación de la documentación
-
-La documentación técnica se considera aceptada cuando:
-
-- El README permite instalar y ejecutar el sistema desde cero.
-- El diccionario de datos coincide con `database/schema.sql`.
-- El mapa de endpoints coincide con las rutas reales de `app/controllers/`.
-- El manual técnico explica la arquitectura y decisiones principales.
-- El manual de usuario permite operar el sistema sin leer el código.
-- El checklist de validación cubre los flujos principales.
-- No se documentan contraseñas reales ni datos sensibles de producción.
-- No se exponen errores internos de base de datos al usuario final.
-
-## 10. Estado actual del punto 7
-
-El punto 7 se encuentra desarrollado como inventario real de documentación técnica entregada.
-
-Existen:
+| README de instalación | `README.md` | Documento principal del proyecto. Presenta el sistema, objetivo, stack tecnológico, estructura general, requisitos, variables de entorno, configuración de base de datos, ejecución local, usuarios demo, roles y reglas principales del flujo de citas. | Entregado y actualizado |
+| Diccionario de datos | `docs/diccionario_datos.md` | Documenta la estructura de la base de datos `gestion_citas_medicas`, incluyendo tablas, campos, tipos de datos, claves primarias, claves foráneas, restricciones, estados `ENUM` y relaciones principales. Incluye la tabla `cita_evento` para trazabilidad de cambios en las citas. | Entregado y actualizado |
+| Mapa de endpoints | `docs/mapa_endpoints.md` | Lista las rutas reales del sistema, método HTTP, roles autorizados, controlador asociado y descripción funcional. Incluye rutas de autenticación, pacientes, médicos, horarios, citas, historial clínico, reportes básicos y endpoints auxiliares. | Entregado y actualizado |
+| Manual técnico | `docs/manual_tecnico.md` | Explica la arquitectura MVC, estructura del proyecto, configuración, conexión a MySQL, seguridad, manejo de errores, logs, transacciones, despliegue en Railway, reglas de negocio y mantenimiento técnico del sistema. | Entregado y actualizado |
+| Manual de usuario | `docs/manual_usuario.md` | Explica el uso funcional del sistema por rol: administrador, recepcionista y médico. Describe el inicio de sesión, gestión de pacientes, programación de citas, confirmación, cancelación, reprogramación, atención médica e historial. | Entregado |
+| Checklist de validación | `docs/checklist_validacion.md` | Contiene la lista de verificación usada para validar el sistema antes de la entrega. Cubre instalación, seguridad, MVC, pacientes, médicos, horarios, citas, historial clínico, reportes básicos, trazabilidad con `cita_evento` y manejo de errores. | Entregado y actualizado |
+| Convenciones, seguridad y Git | `docs/convenciones_seguridad_git.md` | Resume los estándares de codificación, convenciones de nombres, seguridad aplicada, control de roles, consultas parametrizadas, CSRF, logs, rollback, commits semánticos y recomendaciones de flujo Git. | Entregado y actualizado |
+
+## 3. Documentos entregados
+
+Los archivos entregados como documentación técnica del proyecto son:
 
 - `README.md`
 - `docs/diccionario_datos.md`
 - `docs/mapa_endpoints.md`
-- `docs/checklist_validacion.md`
 - `docs/manual_tecnico.md`
 - `docs/manual_usuario.md`
+- `docs/checklist_validacion.md`
 - `docs/convenciones_seguridad_git.md`
 
-Queda pendiente para una entrega visual más completa:
+La tabla `cita_evento`, agregada para registrar la trazabilidad de confirmaciones, cancelaciones, reprogramaciones, notificaciones y atenciones, se encuentra documentada en los archivos correspondientes, principalmente en el diccionario de datos, manual técnico y checklist de validación.
 
-- Agregar capturas de pantalla al manual de usuario cuando la UI final quede congelada.
-- Mantener la documentación sincronizada cuando se agreguen nuevas rutas, tablas o reglas de negocio.
+## 4. Relación entre documentación y módulos del sistema
+
+| Módulo o aspecto del sistema | Documento donde se evidencia |
+|---|---|
+| Instalación y ejecución local | `README.md` |
+| Configuración de variables de entorno | `README.md`, `docs/manual_tecnico.md` |
+| Arquitectura MVC | `docs/manual_tecnico.md` |
+| Base de datos y relaciones | `docs/diccionario_datos.md`, `docs/manual_tecnico.md` |
+| Tabla `cita_evento` y trazabilidad | `docs/diccionario_datos.md`, `docs/manual_tecnico.md`, `docs/checklist_validacion.md` |
+| Rutas y roles permitidos | `docs/mapa_endpoints.md` |
+| Uso del sistema por rol | `docs/manual_usuario.md` |
+| Seguridad y validaciones | `docs/convenciones_seguridad_git.md`, `docs/manual_tecnico.md` |
+| Manejo de errores, logs y rollback | `docs/convenciones_seguridad_git.md`, `docs/manual_tecnico.md` |
+| Pruebas manuales y criterios de revisión | `docs/checklist_validacion.md` |
+
+## 5. Criterios de aceptación cumplidos
+
+La documentación técnica entregada cumple con los siguientes criterios de aceptación:
+
+- El `README.md` permite identificar el sistema, conocer su stack tecnológico, configurar el entorno y ejecutar la aplicación.
+- El diccionario de datos documenta las tablas principales de la base de datos, incluyendo `cita_evento`.
+- El mapa de endpoints identifica las rutas del sistema, los métodos HTTP, los roles autorizados y los controladores responsables.
+- El manual técnico explica la arquitectura MVC, la estructura del proyecto, la configuración, la seguridad, las transacciones y el despliegue.
+- El manual de usuario describe las acciones principales que puede realizar cada rol del sistema.
+- El checklist de validación cubre los flujos principales y casos críticos del sistema.
+- La documentación de convenciones, seguridad y Git resume los estándares aplicados en el desarrollo.
+- No se incluyen contraseñas reales, tokens SMTP ni variables sensibles de producción.
+- No se utiliza la expresión "archivo sugerido"; todos los archivos listados corresponden a documentos existentes en el proyecto.
+
+## 6. Estado final del punto 7
+
+El punto 7 queda desarrollado como inventario real de documentación técnica entregada. Los documentos listados existen dentro del repositorio y describen el estado actual del sistema, incluyendo instalación, arquitectura, base de datos, endpoints, uso por roles, seguridad, validaciones, checklist de pruebas y convenciones de desarrollo.
