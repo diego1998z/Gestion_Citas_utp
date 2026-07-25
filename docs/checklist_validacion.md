@@ -10,9 +10,20 @@ Este documento guía una revisión manual del MVP sin exponer SQL interno al usu
 - [ ] Ejecutar `database/seed.sql`.
 - [ ] Confirmar que `logs/app.log` existe o se crea al iniciar la app.
 
+
+## Usuarios demo de referencia
+
+Los usuarios cargados por `database/seed.sql` están ligados a nombres reales de prueba:
+
+- Administradores: `patricia.salas`, `roberto.rivas`.
+- Recepcionistas: `valeria.nunez`, `marisol.castro`.
+- Médicos: `luis.quispe`, `ana.huaman`, `carlos.choque`, `rosa.condori`, `miguel.torres`, `elena.villanueva`.
+
+El seed documenta hashes de contraseña, no secretos reales de producción.
+
 ## Validación de seguridad
 
-- [ ] Iniciar sesión con usuario demo `admin`.
+- [ ] Iniciar sesión con un administrador demo, por ejemplo `patricia.salas` o `roberto.rivas`.
 - [ ] Probar credenciales incorrectas y confirmar mensaje amigable.
 - [ ] Confirmar que rutas protegidas redirigen o bloquean cuando no hay sesión.
 - [ ] Confirmar que rutas de administración no están disponibles para roles no autorizados.
@@ -59,6 +70,17 @@ Este documento guía una revisión manual del MVP sin exponer SQL interno al usu
 - [ ] Confirmar que la cita queda `ATENDIDA`.
 - [ ] Confirmar que la cita no permite duplicar historial.
 - [ ] Listar historial y verificar datos de paciente, médico y especialidad.
+- [ ] Desde gestión de pacientes, abrir `/pacientes/<id_paciente>/historial` y confirmar que muestra el historial clínico del paciente seleccionado.
+- [ ] Confirmar que el historial del paciente no duplica datos innecesarios y se obtiene desde las citas atendidas.
+
+
+## Trazabilidad de cita_evento
+
+- [ ] Confirmar una cita y verificar que se registra evento `CONFIRMADA`.
+- [ ] Notificar una cita y verificar evento `NOTIFICADA` o `NOTIFICACION_FALLIDA` según el resultado del SMTP.
+- [ ] Cancelar una cita y verificar evento `CANCELADA` con motivo.
+- [ ] Reprogramar una cita y verificar evento `REPROGRAMADA` con fecha/hora anterior y nueva cita relacionada.
+- [ ] Atender o marcar no asistida una cita y verificar evento `ATENDIDA` o `NO_ASISTIO`.
 
 ## Reporte de citas
 

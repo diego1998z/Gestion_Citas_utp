@@ -39,3 +39,5 @@
 - No agregar `Co-Authored-By` ni atribuciones automáticas.
 - Revisar `git status` antes de commitear.
 - No commitear `.env`, `logs/`, `__pycache__/` ni entornos virtuales.
+
+- Para futuras versiones colaborativas, se recomienda trabajar con Pull Requests y Code Review antes de integrar cambios a `master`/`main`. Este punto queda como mejora del flujo, no como práctica obligatoria aplicada durante el desarrollo actual.

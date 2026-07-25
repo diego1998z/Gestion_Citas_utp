@@ -117,6 +117,25 @@ Regla crítica: índice único `id_medico`, `fecha`, `hora`, `cita_activa` evita
 | fecha_atencion | DATETIME | Fecha/hora de atención. |
 | created_at / updated_at | TIMESTAMP | Auditoría. |
 
+## cita_evento
+
+| Campo | Tipo | Regla / descripción |
+|---|---|---|
+| id_cita_evento | INT UNSIGNED PK AI | Identificador del evento de cita. |
+| id_cita | INT UNSIGNED FK | Cita sobre la que se registra el evento. |
+| id_usuario_actor | INT UNSIGNED FK NULL | Usuario del sistema que realizó la acción; puede quedar nulo si el usuario se elimina. |
+| id_cita_relacionada | INT UNSIGNED FK NULL | Cita relacionada, usada principalmente en reprogramaciones. |
+| tipo_evento | ENUM | `CONFIRMADA`, `REPROGRAMADA`, `CANCELADA`, `NOTIFICADA`, `NOTIFICACION_FALLIDA`, `SEGUIMIENTO_CREADO`, `ATENDIDA`, `NO_ASISTIO`. |
+| fecha_anterior | DATE NULL | Fecha previa cuando aplica, por ejemplo en reprogramación. |
+| hora_anterior | TIME NULL | Hora previa cuando aplica. |
+| fecha_nueva | DATE NULL | Nueva fecha cuando aplica. |
+| hora_nueva | TIME NULL | Nueva hora cuando aplica. |
+| motivo | VARCHAR(255) NULL | Motivo asociado al evento, por ejemplo cancelación o reprogramación. |
+| detalle | VARCHAR(255) NULL | Detalle descriptivo del evento. |
+| created_at | TIMESTAMP | Fecha/hora de creación del evento. |
+
+Regla: `cita_evento` funciona como trazabilidad de acciones realizadas sobre una cita, sin modificar el historial clínico del paciente.
+
 ## Relaciones principales
 
 - `usuario_sistema` 1 a 0..1 `administrador`.
@@ -128,3 +147,6 @@ Regla crítica: índice único `id_medico`, `fecha`, `hora`, `cita_activa` evita
 - `medico` 1 a muchos `cita`.
 - `recepcionista` 1 a muchos `cita`.
 - `cita` 1 a 0..1 `historial_cita`.
+- `cita` 1 a muchos `cita_evento`.
+- `usuario_sistema` 1 a muchos `cita_evento` como actor de cambios.
+- `cita` 1 a muchos `cita_evento` como cita relacionada en reprogramaciones o seguimientos.

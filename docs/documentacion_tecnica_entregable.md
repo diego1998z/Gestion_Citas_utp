@@ -1,6 +1,6 @@
 # Documentación técnica entregable
 
-Este documento desarrolla el punto 7 de la guía de codificación del sistema. Su objetivo es definir qué documentos, archivos y evidencias deben entregarse para considerar aceptado el sistema o cada módulo funcional.
+Este documento desarrolla el punto 7 de la guía de codificación del sistema. Su objetivo es inventariar los documentos, archivos y evidencias entregados para considerar aceptado el sistema o cada módulo funcional.
 
 ## 1. Objetivo del entregable
 
@@ -16,16 +16,17 @@ Para el Sistema de Gestión de Citas Médicas, la documentación debe demostrar:
 - Qué reglas de negocio se aplican.
 - Qué validaciones se realizaron antes de la entrega.
 
-## 2. Inventario de documentos requeridos
+## 2. Inventario de documentos entregados
 
-| Entregable | Archivo sugerido | Estado actual | Propósito |
+| Entregable | Archivo entregado | Estado actual | Propósito |
 |---|---|---|---|
-| README de instalación | `README.md` | Avanzado | Explicar requisitos, configuración, base de datos, usuarios demo y ejecución local. |
-| Diccionario de datos | `docs/diccionario_datos.md` | Avanzado | Documentar tablas, campos, tipos de datos, claves primarias, claves foráneas y reglas. |
-| Mapa de endpoints | `docs/mapa_endpoints.md` | Avanzado | Listar rutas, métodos HTTP, roles autorizados y controladores. |
-| Checklist de validación | `docs/checklist_validacion.md` | Avanzado | Guiar pruebas manuales y revisión técnica mínima antes de entregar. |
-| Manual técnico | `docs/manual_tecnico.md` | Creado | Explicar arquitectura, flujo interno, configuración, seguridad, logs y mantenimiento. |
-| Manual de usuario | `docs/manual_usuario.md` | Creado | Explicar el uso del sistema por rol con pasos claros. |
+| README de instalación | `README.md` | Entregado | Explicar requisitos, configuración, base de datos, usuarios demo y ejecución local. |
+| Diccionario de datos | `docs/diccionario_datos.md` | Entregado | Documentar tablas, campos, tipos de datos, claves primarias, claves foráneas y reglas. |
+| Mapa de endpoints | `docs/mapa_endpoints.md` | Entregado | Listar rutas, métodos HTTP, roles autorizados y controladores. |
+| Checklist de validación | `docs/checklist_validacion.md` | Entregado | Guiar pruebas manuales y revisión técnica mínima antes de entregar. |
+| Manual técnico | `docs/manual_tecnico.md` | Entregado | Explicar arquitectura, flujo interno, configuración, seguridad, logs y mantenimiento. |
+| Manual de usuario | `docs/manual_usuario.md` | Entregado | Explicar el uso del sistema por rol con pasos claros. |
+| Convenciones, seguridad y Git | `docs/convenciones_seguridad_git.md` | Entregado | Resumir estándares de codificación, seguridad, manejo de errores y flujo Git. |
 
 ## 3. README de instalación
 
@@ -76,6 +77,7 @@ Tablas mínimas documentadas:
 - `paciente`
 - `cita`
 - `historial_cita`
+- `cita_evento`
 
 Archivo relacionado: `docs/diccionario_datos.md`.
 
@@ -263,7 +265,8 @@ Debe validar:
 - Flujo de horarios.
 - Flujo de citas.
 - Flujo de historial.
-- Reportes.
+- Reporte básico de citas.
+- Trazabilidad de eventos de cita.
 - Manejo de errores.
 
 Archivo relacionado: `docs/checklist_validacion.md`.
@@ -283,7 +286,7 @@ La documentación técnica se considera aceptada cuando:
 
 ## 10. Estado actual del punto 7
 
-El punto 7 se encuentra desarrollado a nivel documental para la entrega base.
+El punto 7 se encuentra desarrollado como inventario real de documentación técnica entregada.
 
 Existen:
 
@@ -298,4 +301,4 @@ Existen:
 Queda pendiente para una entrega visual más completa:
 
 - Agregar capturas de pantalla al manual de usuario cuando la UI final quede congelada.
-- Revisar que la documentación final coincida con la versión definitiva del sistema.
+- Mantener la documentación sincronizada cuando se agreguen nuevas rutas, tablas o reglas de negocio.

@@ -82,13 +82,20 @@ mysql -u root -p gestion_citas_medicas < database/seed.sql
 
 ## Usuarios demo
 
-Si cargás `database/seed.sql`:
+Si cargás `database/seed.sql`, se crean usuarios demo ligados a nombres reales de prueba. El script almacena únicamente `password_hash`; por seguridad no se documentan contraseñas reales ni secretos de producción.
 
-| Usuario | Contraseña | Rol | Registro relacionado |
-| --- | --- | --- | --- |
-| `admin` | `Admin123*` | `ADMINISTRADOR` | `administrador` |
-| `medico` | `Medico123*` | `MEDICO` | `medico` con especialidad `Medicina General` |
-| `recepcionista` | `Recepcion123*` | `RECEPCIONISTA` | `recepcionista` |
+| Usuario | Rol | Registro relacionado |
+| --- | --- | --- |
+| `patricia.salas` | `ADMINISTRADOR` | Administrador Patricia Elena Salas Medina |
+| `roberto.rivas` | `ADMINISTRADOR` | Administrador Roberto Carlos Rivas Alarcon |
+| `valeria.nunez` | `RECEPCIONISTA` | Recepcionista Valeria Milagros Nuñez Castro |
+| `marisol.castro` | `RECEPCIONISTA` | Recepcionista Marisol Andrea Castro Benavides |
+| `luis.quispe` | `MEDICO` | Médico Luis Alberto Quispe Mamani |
+| `ana.huaman` | `MEDICO` | Médico Ana Lucia Huaman Flores |
+| `carlos.choque` | `MEDICO` | Médico Carlos Enrique Choque Rojas |
+| `rosa.condori` | `MEDICO` | Médico Rosa Maria Condori Salazar |
+| `miguel.torres` | `MEDICO` | Médico Miguel Angel Torres Paredes |
+| `elena.villanueva` | `MEDICO` | Médico Elena Pilar Villanueva Soto |
 
 ## Ejecución local
 

@@ -2,7 +2,7 @@
 
 ## 1. Propósito
 
-Sistema web MVC para gestionar citas médicas de la Clínica Universitaria de Comas. Cubre pacientes, médicos, especialidades, horarios, citas, confirmación, reprogramación, cancelación, notificación, historial clínico básico y reportes administrativos.
+Sistema web MVC para gestionar citas médicas de la Clínica Universitaria de Comas. Cubre pacientes, médicos, especialidades, horarios, citas, confirmación, reprogramación, cancelación, notificación, historial clínico básico y reporte básico de citas.
 
 ## 2. Stack y arquitectura
 
@@ -53,9 +53,19 @@ Para notificaciones por correo, el servicio usa SMTP. Con Gmail, crear una App P
 - Script de estructura: `database/schema.sql`.
 - Script de datos demo: `database/seed.sql`.
 - Base: `gestion_citas_medicas`.
-- Tablas principales: `usuario_sistema`, `administrador`, `recepcionista`, `medico`, `especialidad`, `horario`, `paciente`, `cita`, `historial_cita`.
+- Tablas principales: `usuario_sistema`, `administrador`, `recepcionista`, `medico`, `especialidad`, `horario`, `paciente`, `cita`, `historial_cita`, `cita_evento`.
 - Convenciones: tablas en singular, campos en `snake_case`, PK `id_tabla`, FK `id_tabla_relacionada`.
 - Motor: InnoDB para soportar claves foráneas.
+
+Relaciones principales adicionales:
+
+- `cita` genera 0..1 registros en `historial_cita` cuando la atención médica se registra.
+- `cita` registra muchos eventos en `cita_evento` para trazabilidad de confirmaciones, cancelaciones, notificaciones, reprogramaciones, atenciones y no asistencias.
+- `cita_evento.id_usuario_actor` referencia a `usuario_sistema` para identificar quién realizó la acción.
+- `cita_evento.id_cita_relacionada` permite vincular una cita con otra, principalmente en reprogramaciones.
+
+
+Nota sobre reportes: el sistema incluye una vista de reporte básico de citas con filtros y resumen por estado. La exportación completa a PDF/Excel se considera una mejora futura, no parte cerrada del alcance actual.
 
 ## 5. Seguridad implementada
 
