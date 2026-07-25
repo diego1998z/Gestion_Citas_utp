@@ -534,6 +534,39 @@ INNER JOIN (
 ) h ON h.username = u.username
 ON DUPLICATE KEY UPDATE estado = VALUES(estado);
 
+
+-- Horarios demo tarde/noche para pruebas desde las 5pm hasta las 10pm.
+-- Se registra el rango 17:00-23:00 para habilitar turnos a las 17, 18, 19, 20, 21 y 22 horas.
+INSERT INTO horario (id_medico, fecha, hora_inicio, hora_fin, estado)
+SELECT m.id_medico, d.fecha, TIME '17:00:00', TIME '23:00:00', 'DISPONIBLE'
+FROM medico m
+INNER JOIN usuario_sistema u ON u.id_usuario = m.id_usuario
+INNER JOIN (
+    SELECT DATE '2026-07-23' AS fecha
+    UNION ALL SELECT DATE '2026-07-24'
+    UNION ALL SELECT DATE '2026-07-25'
+    UNION ALL SELECT DATE '2026-07-26'
+    UNION ALL SELECT DATE '2026-07-27'
+    UNION ALL SELECT DATE '2026-07-28'
+    UNION ALL SELECT DATE '2026-07-29'
+    UNION ALL SELECT DATE '2026-07-30'
+    UNION ALL SELECT DATE '2026-07-31'
+    UNION ALL SELECT DATE '2026-08-03'
+    UNION ALL SELECT DATE '2026-08-05'
+    UNION ALL SELECT DATE '2026-08-06'
+    UNION ALL SELECT DATE '2026-08-10'
+    UNION ALL SELECT DATE '2026-08-12'
+    UNION ALL SELECT DATE '2026-08-14'
+    UNION ALL SELECT DATE '2026-08-17'
+    UNION ALL SELECT DATE '2026-08-19'
+    UNION ALL SELECT DATE '2026-08-20'
+    UNION ALL SELECT DATE '2026-08-24'
+    UNION ALL SELECT DATE '2026-08-26'
+    UNION ALL SELECT DATE '2026-08-28'
+) d
+WHERE u.estado = 'ACTIVO'
+ON DUPLICATE KEY UPDATE estado = VALUES(estado);
+
 INSERT INTO cita (
     id_paciente,
     id_medico,
